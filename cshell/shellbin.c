@@ -3,7 +3,7 @@ int main() {
 needle0: jmp there\n\
 here:    pop %rdi\n\
          mov $0x3b, %rax\n\
-		 inc %rax\n\
+		     inc %rax\n\
          mov $0, %rsi\n\
          mov $0, %rdx\n\
          syscall\n\
