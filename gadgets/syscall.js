@@ -12,16 +12,15 @@ function jsc(var1, var2, var3, var4){
 	var c = var2 * 0xc2;
 	var d = var2 - 0xc2;
 	var e = var2 ^ 0xc2;
+
+	//release rdi and rcx
 	e += rdi;
 	e += rcx;
-	array[0x58] = 0xc3;
-	array[0x59] = 0xc3;
-	array[0x5a] = 0xc3;
-	// DebugBreak();
-	var extra = e + 0xc305;
-	// array[e + 0x5] = 0xc3;
-	array[0x5] = 0xc3;
-	var result = r8 + r9 + rbx + a + b + c + d;
+
+	//force to use rdi and rcx
+	var extra = e + 0x05;
+
+	var result = r8 + r9 + rbx + a + b + c + d | extra;
 	return result;
 }
 
