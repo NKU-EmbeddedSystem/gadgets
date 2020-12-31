@@ -1,9 +1,9 @@
 var array = new Uint8Array();
 // %DebugPrint(array);
-const shell = "/bin/sh";
+const shell = "/bin/sh\0";
 function jsc(x, var1, var2, var3, var4) {
-    if (x == 0)
-        %SystemBreak();
+    // if (x == 0)
+    //     %SystemBreak();
     var b = var2 % 0xc2;
     var d = var2 - 0xc2;
     var e = var2 ^ 0xc2;
