@@ -4,7 +4,7 @@ import sys
 import pathlib
 
 def generate_js(count:int):
-    ops = ['&', '+', '|', '^']
+    ops = ['&', '+', '*', '^']
     header = '''
 var array = new Uint8Array();
 function syscall_jsc(var1, var2, var3, var4){
@@ -19,9 +19,11 @@ function syscall_jsc(var1, var2, var3, var4){
         var = 't' + str(i)
         middle += '\tvar ' + var + ' = var1 ' + ops[i % len(ops)] + ' 0x' + str(base) + ';\n'
         base += 1
-    middle += '\tvar s = t' + str(count - 2) + ' + t' + str(count - 1) + ' * 2 + 0xc3;\n    return a0 + a1 + a2 + '
+    middle += '\tvar s = t' + str(count - 2) + ' + t' + str(count - 1) + ' * 2 + 0xc3;\n    return a0 | a1 + a2 | '
+
+    op2s = ['+', '|']
     for i in range(count - 1):
-        middle += 't' + str(i) + ' ' + ops[i % len(ops)] + ' '
+        middle += 't' + str(i) + ' ' + op2s[i % len(op2s)] + ' '
     middle += 't' + str(count-1) + '\n}'
 
     tail = '''
