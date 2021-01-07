@@ -4,7 +4,7 @@ import sys
 import pathlib
 
 
-gadgets = ['5ec3', '5ac3']
+gadgets = ['5ec3']
 dd = [0, 0]
 exec_path = ''
 
@@ -18,16 +18,12 @@ def excute_js(js:str)->bool:
     f.close()
     for line in lines:
         for jsc in gadgets:
-            if line.find(jsc) != -1:
-                words = line.split(' ')
-                while '' in words: words.remove('')
-                # print(words)
+            if line.find('lea') != -1 and line.find(jsc) != -1:
+                words = line.split()
                 if len(words) > 3 and words[2].find(jsc) != -1 and words[2].find(jsc) % 2 == 0:
-                    print(words[2])
+                    print(words)
                     os.system('cp test.js ' + jsc + str(dd[gadgets.index(jsc)]) + '.js')
                     dd[gadgets.index(jsc)] += 1
-                    return True
-    return False
 
 def search_word(word:str, lines:list):
     result = ''
@@ -46,10 +42,10 @@ def analyse(count:int):
     return result
 
 def generate_js(count:int):
-    ops = ['&', '+', '*', '^']
+    ops = ['&', '*']
     header = '''
 var array = new Uint8Array();
-function syscall_jsc(var1, var2, var3, var4){
+function syscall_jsc(var1, var2, var3, var4){    
     var a0 = var1 ^ 0x111;
     var a1 = var1 ^ 0x112;
     var a2 = var1 ^ 0x113;
@@ -63,11 +59,21 @@ function syscall_jsc(var1, var2, var3, var4){
         base += 1
     
     jscs = []
+    jsc = '\tvar s = a0 * 2 + a1 + 0xc3;\n    return a0 | a1 + a2 |'
+    jscs.append(jsc)
+    jsc = '\tvar s = a0 * 2 + a2 + 0xc3;\n    return a0 | a1 + a2 |'
+    jscs.append(jsc)
+    jsc = '\tvar s = a1 * 2 + a2 + 0xc3;\n    return a0 | a1 + a2 |'
+    jscs.append(jsc)
+
     for i in range(count):
-        for j in range(count):
+        jsc = '\tvar s = a0 * 2' + ' + t' + str(i) + ' + 0xc3;\n    return a0 | a1 + a2 |'
+        jsc = '\tvar s = a1 * 2' + ' + t' + str(i) + ' + 0xc3;\n    return a0 | a1 + a2 |'
+        jsc = '\tvar s = a2 * 2' + ' + t' + str(i) + ' + 0xc3;\n    return a0 | a1 + a2 |'
+        for j in range(i, count):
             if i == j:
                 continue
-            jsc = '\tvar s = t' + str(i) + ' + t' + str(j) + ' * 2 + 0xc3;\n    return a0 | a1 + a2 | '
+            jsc = '\tvar s = t' + str(i) + '*2 + t' + str(j) + ' + 0xc3;\n    return a0 | a1 + a2 |'
             jscs.append(jsc)
 
     middle2 = ''
@@ -99,7 +105,7 @@ if __name__ == "__main__":
         exit()
 
 
-    for i in range(32):
+    for i in range(24):
         generate_js(i)
         # excute_js(test_js)
         # f.write(analyse(i))
