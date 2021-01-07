@@ -19,10 +19,14 @@ def excute_js(js:str)->bool:
     for line in lines:
         for jsc in gadgets:
             if line.find(jsc) != -1:
-                print(line)
-                os.system('cp test.js ' + jsc + str(dd[gadgets.index(jsc)]) + '.js')
-                dd[gadgets.index(jsc)] += 1
-                return True
+                words = line.split(' ')
+                while '' in words: words.remove('')
+                # print(words)
+                if len(words) > 3 and words[2].find(jsc) != -1 and words[2].find(jsc) % 2 == 0:
+                    print(words[2])
+                    os.system('cp test.js ' + jsc + str(dd[gadgets.index(jsc)]) + '.js')
+                    dd[gadgets.index(jsc)] += 1
+                    return True
     return False
 
 def search_word(word:str, lines:list):
