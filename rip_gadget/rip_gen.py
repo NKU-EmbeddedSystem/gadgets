@@ -31,45 +31,45 @@ def excute_js(js:str)->bool:
 
 def generate_js(count:int):
     header = \
-    '''
+'''
+array = new Uint8Array();
 const constant = 0x1234;
 function payload3(v1, v2) {
-	var g10 = v1 * 0x1111;
-	var g11 = v1 * 0x2222;
-	var g12 = v1 * 0x3333;
-	var g13 = v1 * 0x4444;
-	var g14 = v1 * 0x5555;
-	var g15 = v1 * 0x6666;
-	var g1;
-    v1 ^= 0x12345678;
+	array[10] = v1 + 0x11;
+	array[11] = v1 + 0x22;
+	array[12] = v1 + 0x33;
+	array[13] = v1 + 0x44;
+	array[14] = v1 + 0x55;
+	array[15] = v1 + 0x66;
+	array[1];
 	if (v1 > 0){
-		g1 = 0x00;
+		array[1] = 0x00;
 '''
 
     ops = ['&', '*']
     middle = ''
     for i in range(count):
         # middle += '        g15 ' +  ops[i % len(ops)] + '= ' + hex(random.randint(0xa0000000, 0xffffffff)) + ';\n'
-        middle += '        g15 ' +  ops[i % len(ops)] + '= ' + "0x5678" + ';\n'
+        middle += '        array[15] ' +  ops[i % len(ops)] + '= ' + "0x56" + ';\n'
 
     tail = \
 '''
 	}
 	else{
-		g1 = 0x01;
+		array[1] = 0x01;
 	}
-	var g16 = v1 * 0x7777;
-	var g2;
+	array[16] = v1 * 0x77;
+	array[2];
 	if (v1 > 0)
-		g2 = 0x00;
+		array[2] = 0x00;
 	else
-		g2 = 0x01;
-	var g17 = v1 * 0x8888;
-	var g18 = v1 * 0x9999;
-	var g19 = v1 * 0x1212;
-	var g20 = v1 * 0x2323;
-	var g21 = v1 * 0x3434;
-	return g1 ^ g2 ^ g10 ^ g11 ^ g12 ^ g13 ^ g14 ^ g15 ^ g16 ^ g17 ^ g18 ^ g19 ^ g20 ^ g21;
+		array[2] = 0x01;
+	array[17] = v1 * 0x88;
+	array[18] = v1 * 0x99;
+	array[19] = v1 * 0x12;
+	array[20] = v1 * 0x23;
+	array[21] = v1 * 0x34;
+	return array[1] ^ array[2] ^ array[10] ^ array[11] ^ array[12] ^ array[13] ^ array[14] ^ array[15] ^ array[16] ^ array[17] ^ array[18] ^ array[19] ^ array[20] ^ array[21];
 }
 
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     # for i in range(24):
     #     generate_js(i)
     # print('done')
-    for i in range(5000, 10000):
+    for i in range(0, 10000):
         print(i)
         js = generate_js(i)
         excute_js(js)
