@@ -49,7 +49,8 @@ function payload3(v1, v2) {
     ops = ['&', '*']
     middle = ''
     for i in range(count):
-        middle += '        g15 ' +  ops[i % len(ops)] + '= ' + hex(random.randint(0xa0000000, 0xffffffff)) + ';\n'
+        # middle += '        g15 ' +  ops[i % len(ops)] + '= ' + hex(random.randint(0xa0000000, 0xffffffff)) + ';\n'
+        middle += '        g15 ' +  ops[i % len(ops)] + '= ' + "0x5678" + ';\n'
 
     tail = \
 '''
@@ -93,7 +94,7 @@ if __name__ == "__main__":
     # for i in range(24):
     #     generate_js(i)
     # print('done')
-    for i in range(4100, 4200):
+    for i in range(5000, 10000):
         print(i)
         js = generate_js(i)
         excute_js(js)
