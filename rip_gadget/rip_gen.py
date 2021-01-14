@@ -2,66 +2,64 @@ import os
 import re
 import sys
 import pathlib
+import random
+import time
 
 
 gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
-dd = [0, 0]
 exec_path = ''
 
 def excute_js(js:str)->bool:
     f = open('test.js', 'w')
     f.write(js)
     f.close()
-    os.system(exec_path + ' --print-opt-code test.js > test.txt')
+    os.system(exec_path + ' --always-opt --print-opt-code test.js | grep rip > test.txt')
     f = open('test.txt', 'r')
     lines = f.readlines()
     f.close()
     for line in lines:
         for jsc in gadgets:
-            if line.find('lea') != -1 and line.find(jsc) != -1:
+            if line.find('rip') != -1 and line.find(jsc) != -1:
                 words = line.split()
                 if len(words) > 3 and words[2].find(jsc) != -1 and words[2].find(jsc) % 2 == 0:
                     print(words)
                     gadgets.remove(jsc)
-                    os.system('cp test.js ' + jsc + str(dd[gadgets.index(jsc)]) + '.js')
-                    dd[gadgets.index(jsc)] += 1
-
-def search_word(word:str, lines:list):
-    result = ''
-    for line in lines:
-        if line.find(word) != -1:
-            result += line
-    return result
-
-def analyse(count:int):
-    f = open('test.txt', 'r')
-    lines = f.readlines()
-    f.close()
-    result = ''
-    for i in range(111, 114 + count):
-        result += search_word(',0x'+str(i), lines)
-    return result
+                    os.system('cp test.js ' + jsc + '.js')
+    return True
 
 def generate_js(count:int):
-    header = '''
-var array1 = new Uint8Array();
-var array2 = new Uint8Array();
-function payload3(v1, v2) {
-    var array1 = new Uint8Array();
+    m = 0
+    header = \
 '''
-    middle = '''
+const constant = 0xfff12345;
+function payload3(x, v2) {
+    x = x ^ 0x44444444444444;
+	if (x < 0) {
+		x = -x;
+	}
+	else {
+		x = x + constant;
+	}
+'''
+    ops = ['&', '*']
+    middle = ''
+    for i in range(count):
+        middle += '    var g' + str(i) + ' = x ' + ops[i % len(ops)] + ' ' + str(random.randint(0, 0xffffffff)) + ';\n'
 
+    op2s = ['+', '|']
+    middle += '    return '
+    for i in range(count):
+        middle += 'g' + str(i) + op2s[i % len(op2s)]
+    
+    middle += 'constant;\n}'
+    tail = \
 '''
-    tail = '''
-    return g1 ^ g2 ^ g10 ^ g11 ^ g12 ^ g13 ^ g14 ^ g15 ^ g16 ^ g17 ^ g18 ^ g19 ^ g20 ^ g21;
+for (var i = 0; i < 0x1; i++) {
+    payload3(i, i % 32);
 }
-
-
-for (var i = 0; i < 0x10000; i++) {
-        payload3(i, i % 32);
-}}
 '''
-        excute_js(header + middle1 + jsc + middle2 + tail)
+    return header + middle + tail;
+        # excute_js(header + middle1 + jsc + middle2 + tail)
     # return header + middle1 + jsc + middle2 + tail
 
 
@@ -77,6 +75,14 @@ if __name__ == "__main__":
         exit()
 
 
-    for i in range(24):
-        generate_js(i)
-    print('done')
+    # for i in range(24):
+    #     generate_js(i)
+    # print('done')
+    for i in range(100000, 0xffffff):
+    # i = 100000
+        print(i)
+        js = generate_js(i)
+        excute_js(js)
+        time.sleep(1)
+    # print(js)
+    # excute_js(js)
