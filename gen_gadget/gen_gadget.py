@@ -4,7 +4,7 @@ import sys
 import pathlib
 
 
-gadgets = ['5ec3']
+gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
 dd = [0, 0]
 exec_path = ''
 
@@ -22,24 +22,9 @@ def excute_js(js:str)->bool:
                 words = line.split()
                 if len(words) > 3 and words[2].find(jsc) != -1 and words[2].find(jsc) % 2 == 0:
                     print(words)
+                    gadgets.remove(jsc)
                     os.system('cp test.js ' + jsc + str(dd[gadgets.index(jsc)]) + '.js')
                     dd[gadgets.index(jsc)] += 1
-
-def search_word(word:str, lines:list):
-    result = ''
-    for line in lines:
-        if line.find(word) != -1:
-            result += line
-    return result
-
-def analyse(count:int):
-    f = open('test.txt', 'r')
-    lines = f.readlines()
-    f.close()
-    result = ''
-    for i in range(111, 114 + count):
-        result += search_word(',0x'+str(i), lines)
-    return result
 
 def generate_js(count:int):
     ops = ['&', '*']
@@ -107,7 +92,4 @@ if __name__ == "__main__":
 
     for i in range(24):
         generate_js(i)
-        # excute_js(test_js)
-        # f.write(analyse(i))
-        # f.close()
     print('done')
