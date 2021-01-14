@@ -25,43 +25,58 @@ def excute_js(js:str)->bool:
                     print(words)
                     gadgets.remove(jsc)
                     os.system('cp test.js ' + jsc + '.js')
+    
+    os.system('python3 ana.py')
     return True
 
 def generate_js(count:int):
-    m = 0
     header = \
+    '''
+const constant = 0x1234;
+function payload3(v1, v2) {
+	var g10 = v1 * 0x1111;
+	var g11 = v1 * 0x2222;
+	var g12 = v1 * 0x3333;
+	var g13 = v1 * 0x4444;
+	var g14 = v1 * 0x5555;
+	var g15 = v1 * 0x6666;
+	var g1;
+    v1 ^= 0x12345678;
+	if (v1 > 0){
+		g1 = 0x00;
 '''
-const constant = 0xfff12345;
-function payload3(x, v2) {
-    x = x ^ 0x44444444444444;
-	if (x < 0) {
-		x = -x;
-	}
-	else {
-		x = x + constant;
-	}
-'''
+
     ops = ['&', '*']
     middle = ''
     for i in range(count):
-        middle += '    var g' + str(i) + ' = x ' + ops[i % len(ops)] + ' ' + str(random.randint(0, 0xffffffff)) + ';\n'
+        middle += '        g15 ' +  ops[i % len(ops)] + '= ' + hex(random.randint(0xa0000000, 0xffffffff)) + ';\n'
 
-    op2s = ['+', '|']
-    middle += '    return '
-    for i in range(count):
-        middle += 'g' + str(i) + op2s[i % len(op2s)]
-    
-    middle += 'constant;\n}'
     tail = \
 '''
+	}
+	else{
+		g1 = 0x01;
+	}
+	var g16 = v1 * 0x7777;
+	var g2;
+	if (v1 > 0)
+		g2 = 0x00;
+	else
+		g2 = 0x01;
+	var g17 = v1 * 0x8888;
+	var g18 = v1 * 0x9999;
+	var g19 = v1 * 0x1212;
+	var g20 = v1 * 0x2323;
+	var g21 = v1 * 0x3434;
+	return g1 ^ g2 ^ g10 ^ g11 ^ g12 ^ g13 ^ g14 ^ g15 ^ g16 ^ g17 ^ g18 ^ g19 ^ g20 ^ g21;
+}
+
+
 for (var i = 0; i < 0x1; i++) {
-    payload3(i, i % 32);
+	payload3(i, i % 32);
 }
 '''
     return header + middle + tail;
-        # excute_js(header + middle1 + jsc + middle2 + tail)
-    # return header + middle1 + jsc + middle2 + tail
-
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -78,11 +93,10 @@ if __name__ == "__main__":
     # for i in range(24):
     #     generate_js(i)
     # print('done')
-    for i in range(100000, 0xffffff):
-    # i = 100000
+    for i in range(4100, 4200):
         print(i)
         js = generate_js(i)
         excute_js(js)
-        time.sleep(1)
+    # time.sleep(1)
     # print(js)
     # excute_js(js)
