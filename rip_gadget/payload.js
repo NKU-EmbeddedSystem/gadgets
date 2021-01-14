@@ -1,7 +1,7 @@
 var array1 = new Uint8Array();
 var array2 = new Uint8Array();
+const constant = 0x1234;
 function payload3(v1, v2) {
-        var array1 = new Uint8Array();
         var g10 = v1 * 0x1111;
         var g11 = v1 * 0x2222;
         var g12 = v1 * 0x3333;
@@ -9,10 +9,12 @@ function payload3(v1, v2) {
         var g14 = v1 * 0x5555;
         var g15 = v1 * 0x6666;
         var g1;
-        if (v1 > 0)
+        if (v1 > 0){
                 g1 = 0x00;
-        else
+        }
+        else{
                 g1 = 0x01;
+        }
         var g16 = v1 * 0x7777;
         var g2;
         if (v1 > 0)
