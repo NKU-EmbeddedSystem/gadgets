@@ -6,8 +6,8 @@ import random
 import time
 
 
-gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
-# gadgets = ['5ec3']
+# gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
+gadgets = []
 exec_path = ''
 
 def excute_js(js:str)->bool:
@@ -27,7 +27,7 @@ def excute_js(js:str)->bool:
                     gadgets.remove(jsc)
                     os.system('cp test.js ' + jsc + '.js')
     
-    os.system('python3 ana.py')
+    os.system('python3 ana2.py')
     return True
 
 def generate_js(count:int):
@@ -93,8 +93,9 @@ if __name__ == "__main__":
         print(i)
         js = generate_js(i)
         excute_js(js)
-        if len(gadgets) == 0:
-            break
+        time.sleep(1)
+        # if len(gadgets) == 0:
+            # break
     # time.sleep(1)
     # print(js)
     # excute_js(js)
