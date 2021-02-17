@@ -1,5 +1,4 @@
 
-var array = new Uint8Array();
 function f5ac3(var1, var2, var3, var4){    
     var a0 = var1 ^ 0x111;
     var a1 = var1 ^ 0x112;
