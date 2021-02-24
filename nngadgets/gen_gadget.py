@@ -42,6 +42,7 @@ def excute_js(js:str, filename:str)->bool:
             if line.find('lea') != -1 and line.find(jsc) != -1:
                 words = line.split()
                 if len(words) > 3 and words[2].find(jsc) != -1 and words[2].find(jsc) % 2 == 0:
+                    gadgets.remove(jsc)
                     return True
     
     return False
@@ -153,7 +154,7 @@ def generate_js(filename:str):
     if not excute_js(header + jsc0f05 + tail, '0f05'):
         print('generate 0f05 failed')
     
-    out = open('jsc.js')
+    out = open('jsc.js', 'w')
     # write jsc function
 
 
