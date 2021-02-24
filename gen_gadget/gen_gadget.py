@@ -31,16 +31,16 @@ def generate_js(count:int):
     header = '''
 var array = new Uint8Array();
 function syscall_jsc(var1, var2, var3, var4){    
-    var a0 = var1 ^ 0x111;
-    var a1 = var1 ^ 0x112;
-    var a2 = var1 ^ 0x113;
+    var a0 = var1 + 0x111;
+    var a1 = var1 + 0x112;
+    var a2 = var1 + 0x113;
 '''
 
     base = 114
     middle1 = ''
     for i in range(count):
         var = 't' + str(i)
-        middle1 += '\tvar ' + var + ' = var1 ' + ops[i % len(ops)] + ' 0x' + str(base) + ';\n'
+        middle1 += '\tvar ' + var + ' = var1 + 0x' + str(base) + ';\n'
         base += 1
     
     jscs = []

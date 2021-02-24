@@ -13,9 +13,7 @@ function jsc(var1, var2, var3, var4){
 	var e = var2 ^ 0xc2;
 	e += rdi;
 	e += rcx;
-	//var extra = e + 0xc3;
-	array[0x5] = 0xc3;
-	//array[0x5] = 0xc3;
+	array[rcx + rdi * 2 + 0x5] = 0xc3;
 	var result = r8 + r9 + rbx + a + b + c + d + e; 
 	return result + array[0x5];
 }
