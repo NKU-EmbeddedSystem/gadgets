@@ -140,7 +140,7 @@ def generate_js(filename:str):
         print('generate 5ec3 failed')
     # 428d8c5fc3000000 ;leal rcx,[rdi+r11*2+0xc3]
     # jsc5fc3 = '\tvar s = t' + str(int(rs_map['rdi']) - base) + ' + t' + str(int(rs_map['r11']) - base) + ' * 2 + 0xc3;\n'
-    jsc5fc3 = gen_jsc('rsi', 'r11')
+    jsc5fc3 = gen_jsc('rdi', 'r11')
     if not excute_js(header + jsc5fc3 + tail, '5fc3'):
         print('generate 5fc3 failed')
     # 438d8c58c3000000 ;leal rcx,[r8+r11*2+0xc3]
