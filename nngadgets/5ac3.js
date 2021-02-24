@@ -13,7 +13,7 @@ function syscall_jsc(var0, var1, var2, var3, var4, var5, var6, var7, var8, var9,
 	var t9 = var9 & 0x119;
 	var t10 = var10 & 0x120;
 	var t11 = var11 & 0x121;
-	var s = t5 * 2 + t7 + 0xc3;
+var s = t10 + t4 * 2 + 0xc3;
     return  t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 + t10 + t11 | s;
 }
 
