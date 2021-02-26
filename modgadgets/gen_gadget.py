@@ -70,7 +70,7 @@ function jsc('''
     middle2 = '\treturn '
     ops = ['&', '|', '^']
     for i in range(idx - 1):
-        middle2 += 't' + str(i) + ' ' + ops[i % len(ops)] + ' '
+        middle2 += 't' + str(i) + ' ' + '&' + ' '
     middle2 += 't' + str(idx-1) + ';\n}\n'
 
     tail = '''
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         print('path of v8 error')
         exit()
 
-    count = 1
+    count = 12
     val = 0
     # while count < 24:
     #     for j in range(1, count + 1):
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     #             print(rs_map)
     #     count += 1
     
-    generate_template(9, 6)
+    generate_template(12, 3)
     rs_map = get_registers('test.txt')
 
     if not rs_set < set(rs_map.keys()):
