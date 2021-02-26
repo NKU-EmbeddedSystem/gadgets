@@ -1,13 +1,13 @@
 
 function jsc(var0, var1, var2, var3, var4, var5, var6, var7, var8, var9, var10, var11){
-	var t0 = var0 + 0x110;
+	var t0 = var0 - 0x3d;
 	var t1 = var0 + 0x111;
 	var t2 = var0 + 0x112;
-	var t3 = var11 + 0x113;
+	var t3 = var1 + 0x113;
 	var t4 = var1 + 0x114;
 	var t5 = var1 + 0x115;
 	var t6 = var2 + 0x116;
-	var t7 = var2 + 0x117;
+	var t7 = var2 - 0x3d;
 	var t8 = var2 + 0x118;
 	var t9 = var3 + 0x119;
 	var t10 = var3 + 0x120;

