@@ -13,19 +13,8 @@ function syscall_jsc(var0, var1, var2, var3, var4, var5, var6, var7, var8, var9,
 	var t9 = var9 & 0x119;
 	var t10 = var10 & 0x120;
 	var t11 = var11 & 0x121;
-	var i0 = t11 + 0x11;
-	var i1 = t11 - 0x3d;
-	var i2 = t11 + 0x13;
-	var i3 = t11 + 0x14;
-	var i4 = t11 + 0x15;
-	var i5 = t11 + 0x16;
-	var i6 = t11 + 0x17;
-	var i7 = t11 + 0x18;
-	var i8 = t11 + 0x19;
-	var i9 = t11 + 0x20;
-	var i10 = t11 + 0x21;
-	var i11 = t11 + 0x22;
-	return t0  + t1  + t2  + t3  + t4  + t5 + t6 + t7 + t8 + t9 + t10 + t11 | (i0 + i1 + i2 + i3 + i4 + i5 + i6 + i7 + i8 + i9 + i10 + i11);
+	var s = t10 + t11 * 2 + 0xc3;
+	return t0 + t1 + t2 + t3 + t4 + t5 + t6 + t7 + t8 + t9 | s;
 }
 
 for(var i = 0; i < 0x10000; i++)
