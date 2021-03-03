@@ -71,7 +71,7 @@ function syscall_jsc('''
     middle2 = ''
     for i in range(count - 1):
         middle2 += 't' + str(i) + ' ' + '+ '
-    middle2 += 't' + str(count-1) + ' | s;\n}\n'
+    middle2 += 't' + str(count-1) + ' + s;\n}\n'
 
     tail = '''
 for(var i = 0; i < 0x10000; i++)
@@ -96,7 +96,7 @@ def gen_jsc(r1:str, r2:str):
                 jsc += ' + '
             jsc += 't' + str(i)
             l = True
-    jsc += ' | s;\n'
+    jsc += ' + s;\n'
     return jsc
 
 def gen_syscall(r1:str, r2:str):
@@ -110,7 +110,7 @@ def gen_syscall(r1:str, r2:str):
                 jsc += ' + '
             jsc += 't' + str(i)
             l = True
-    jsc += ' | s;\n'
+    jsc += ' + s;\n'
     return jsc
 
 def generate_js(filename:str):
