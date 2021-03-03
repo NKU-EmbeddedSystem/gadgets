@@ -3,12 +3,9 @@ import re
 import sys
 import pathlib
 
-# 48 8d 5a c3             lea    rbx,[rdx-0x3d]
-# 48 8d 5e c3             lea    rbx,[rsi-0x3d]
-# 48 8d 58 c3             lea    rbx,[rax-0x3d]
-# 48 8d 5f c3             lea    rbx,[rdi-0x3d]
+
 gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
-rs_set = {'rdx', 'rax', 'rsi', 'rbx', 'rdi'}
+rs_set = {'rdx', 'r11', 'rsi', 'rbx', 'rdi', 'r8', 'rcx'}
 exec_path = ''
 count = 12
 
@@ -76,7 +73,7 @@ function syscall_jsc('''
     tail += '\treturn '
     for i in range(count - 1):
         tail += 't' + str(i) + ' ' + ' + '
-    tail += 't' + str(count-1) + ' + ('
+    tail += 't' + str(count-1) + ' | ('
     for i in range(count - 1):
         tail += 'i' + str(i) + ' + '
     tail += 'i' + str(count - 1) + ');\n}\n'
@@ -97,7 +94,8 @@ def generate_template(count:int):
     jsc = ''
     base = 11
     for i in range(count):
-        jsc += '\tvar i' + str(i) + ' = t' + str(i) + ' + 0x' + str(i + base) + ';\n'
+        jsc += '\tvar i' + str(i) + ' = t' + str(i) + ' + 0x' + str(i) + ';\n'
+        base += 1
 
     excute_js(header + jsc + tail, 'test')
 
