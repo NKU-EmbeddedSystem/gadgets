@@ -6,7 +6,7 @@ import random
 import time
 
 
-# gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
+gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
 gadgets = []
 exec_path = ''
 
@@ -27,7 +27,6 @@ def excute_js(js:str)->bool:
                     gadgets.remove(jsc)
                     os.system('cp test.js ' + jsc + '.js')
     
-    os.system('python3 ana2.py')
     return True
 
 def generate_js(count:int):
