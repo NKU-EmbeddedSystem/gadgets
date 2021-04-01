@@ -19,7 +19,7 @@ def get_header(func_name: str):
 
 def get_tail(func_name: str):
     tail = f'''
-for(var i = 0; i < 0x10000; i++)
+for(let i = 0; i < 0x10000; i++)
 '''
     tail += '{\n'
     tail += f'\tjsc{func_name}('
@@ -31,7 +31,7 @@ for(var i = 0; i < 0x10000; i++)
 
 
 def gen_jsc(r1: str, r2: str, scale=2, imm='c3'):
-    jsc = f'\tvar s = {r1} + {r2} * {scale} + 0x{imm};\n\treturn '
+    jsc = f'\tlet s = {r1} + {r2} * {scale} + 0x{imm};\n\treturn '
 
     for i in range(len(registers)):
         if i == registers.index(r1) or i == registers.index(r2):
