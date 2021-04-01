@@ -74,14 +74,4 @@ def generate_js():
 
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print('please input the path of v8')
-        exit()
-
-    exec_path = sys.argv[1]
-    p = pathlib.Path(exec_path)
-    if not p.is_file():
-        print('path of v8 error')
-        exit()
-
     generate_js()
