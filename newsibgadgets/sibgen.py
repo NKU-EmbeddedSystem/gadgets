@@ -1,6 +1,6 @@
 # import os
-import pathlib
-import sys
+# import pathlib
+# import sys
 
 registers = ['rdx', 'rcx', 'rdi', 'r8', 'r9', 'r11', 'r12', 'r14', 'r15', 'rax', 'rbx', 'rsi']
 
@@ -13,7 +13,7 @@ def get_header(func_name: str):
     header += registers[-1] + '){\n'
 
     for i in range(len(registers)):
-        header += f'\tvar t{i} = {registers[i]} & 0x{110 + i};\n'
+        header += f'\t{registers[i]} &= 0x{10 + i};\n'
     return header
 
 
@@ -23,7 +23,7 @@ for(var i = 0; i < 0x10000; i++)
 '''
     tail += '{\n'
     tail += f'\tjsc{func_name}('
-    for i in range(len(registers)):
+    for i in range(len(registers) - 1):
         tail += f'0xc{i}, '
     tail += f'0xc{len(registers) - 1});\n'
     tail += '}\n'
@@ -31,12 +31,12 @@ for(var i = 0; i < 0x10000; i++)
 
 
 def gen_jsc(r1: str, r2: str, scale=2, imm='c3'):
-    jsc = f'\tvar s = t{registers.index(r1)} + t{registers.index(r2)} * {scale} + 0x{imm};\n\treturn '
+    jsc = f'\tvar s = {r1} + {r2} * {scale} + 0x{imm};\n\treturn '
 
     for i in range(len(registers)):
         if i == registers.index(r1) or i == registers.index(r2):
             continue
-        jsc += f't{i} + '
+        jsc += f'{registers[i]} + '
 
     jsc += 's;\n}\n'
     return jsc
