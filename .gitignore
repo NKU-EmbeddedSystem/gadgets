@@ -3,3 +3,4 @@
 /gen_gadget/*.js
 *.json
 *.cfg
+/.idea/*
