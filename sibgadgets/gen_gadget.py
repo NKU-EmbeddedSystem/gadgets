@@ -47,7 +47,7 @@ def excute_js(js:str, filename:str)->bool:
                 if len(words) > 3 and words[2].find(jsc) != -1 and words[2].find(jsc) % 2 == 0:
                     gadgets.remove(jsc)
                     return True
-    
+
     return False
 
 def generate_template(count:int):
@@ -64,7 +64,7 @@ function syscall_jsc('''
         var = 't' + str(i)
         middle1 += '\tvar ' + var + ' = var' + str(i) + ' & 0x' + str(base) + ';\n'
         base += 1
-    
+
 
     jsc = '\t\tvar s = t' + str(0) + ' * 2 + t' + str(1) + ' + 0xc3;\n    return  '
 
@@ -151,7 +151,7 @@ def generate_js(filename:str):
     jsc0f05 = gen_syscall('rcx', 'rdi')
     if not excute_js(header + jsc0f05 + tail, '0f05'):
         print('generate 0f05 failed')
-    
+
     out = open('jsc.js', 'w')
     # write jsc function
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print('plese input the path of v8')
         exit()
-    
+
     exec_path = sys.argv[1]
     p = pathlib.Path(exec_path)
     if not p.is_file():
