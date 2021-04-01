@@ -1,3 +1,5 @@
 .gdb_history
 *.txt
 /gen_gadget/*.js
+*.json
+*.cfg
