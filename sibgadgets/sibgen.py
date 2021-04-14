@@ -70,8 +70,6 @@ def generate_js():
     jsc0f05 = gen_jsc('rcx', 'rdi', 1, '05')
     execute_js(get_header('0f05') + jsc0f05 + get_tail('0f05'), '0f05')
 
-    # out = open('jsc.js', 'w')
-
 
 if __name__ == '__main__':
     generate_js()
