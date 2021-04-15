@@ -1,8 +1,8 @@
-function jsc(rdx, rcx, rdi, r8){
-	let xmm0 = rdx + 1.01;
-	let xmm1 = rcx + 1.02;
-	let xmm2 = rdi + 1.03;
-	let xmm3 = r8 + 1.04;
+function jsc(x0, x1, x2, x3){
+	let xmm0 = x0 + 1.01;
+	let xmm1 = x1 + 1.02;
+	let xmm2 = x2 + 1.03;
+	let xmm3 = x3 + 1.04;
 	//jsc xmm0,xmm0,xmm3
 	let i0 = xmm3 + xmm0;
 	return xmm0 * xmm1 * xmm2 * xmm3  + (i0);
