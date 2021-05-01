@@ -1,23 +1,21 @@
-let array = new Uint8Array();
-function jsc58c3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax, rbx, rsi){
-	rdx &= 0x10;
-	rcx &= 0x11;
-	rdi &= 0x12;
-	r8 &= 0x13;
-	r9 &= 0x14;
-	r11 &= 0x15;
-	r12 &= 0x16;
-	r14 &= 0x17;
-	r15 &= 0x18;
-	rax &= 0x19;
-	rbx &= 0x20;
-	rsi &= 0x21;
-	array[r8 + 0xc3] = 0xc2;
-	let s = r8 + r11 * 2 + 0xc3;
-	return rdx + rcx + rdi + r9 + r12 + r14 + r15 + rax + rbx + rsi + s;
+function js58c3(xmm0, xmm1, xmm2, xmm3, xmm4, xmm5, xmm6, xmm7, xmm8, xmm9, xmm10, xmm11){
+	xmm0 += 0.10;
+	xmm1 += 0.11;
+	xmm2 += 0.12;
+	xmm3 += 0.13;
+	xmm4 += 0.14;
+	xmm5 += 0.15;
+	xmm6 += 0.16;
+	xmm7 += 0.17;
+	xmm8 += 0.18;
+	xmm9 += 0.19;
+	xmm10 += 0.20;
+	xmm11 += 0.21;
+	let s = xmm3 + xmm0;
+	return xmm1 + xmm2 + xmm4 + xmm5 + xmm6 + xmm7 + xmm8 + xmm9 + xmm10 + xmm11 + (s);
 }
 
 for(let i = 0; i < 0x10000; i++)
 {
-	jsc58c3(0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xc10, 0xc11);
+	js58c3(0.60, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.610, 0.611);
 }
