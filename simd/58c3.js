@@ -1,15 +1,15 @@
-function jsc(x0, x1, x2, x3){
-	let xmm0 = x0 + 1.01;
-	let xmm1 = x1 + 1.02;
-	let xmm2 = x2 + 1.03;
-	let xmm3 = x3 + 1.04;
-	//jsc xmm0,xmm0,xmm3
-	let i0 = xmm3 + xmm0;
-	return xmm0 * xmm1 * xmm2 * xmm3  + (i0);
+function jsc(var0, var1, var2, var3, var4, var5, var6, var7, var8, var9, var10, var11)
+{
+    var xmm0 = var0+ 1.01;
+    var xmm1 = var1 + 1.02;
+    var xmm2 = var2 + 1.03;
+    var xmm3 = var3 + 1.04;
+    var i0 = xmm1 + xmm2;
+    var i1 = xmm3 + xmm0;
+    return i0 + i1;
 }
 
-
-for(let i = 0; i < 0x1000; i++)
+for(let i = 0; i < 0x10000; i++)
 {
-	jsc(1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.2);
+    jsc(0.61, 0.71, 0.72, 0.63, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.710, 0.711);
 }
