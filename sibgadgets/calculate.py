@@ -1,5 +1,21 @@
 #!/usr/bin/env python
 # coding=utf-8
+one_byte_instructions = set([0x60, 0x61,0x98,0xa4,0xa5,0xd7,0xf4,0xcc,0xce,0xcf,0xc9,0xc3,0xcb,0xf5,0xf8,0xf9,0xfa,0xfb,0xfc,0xfd,0x9e,0x9f,0xd6])
+
+def fill_instructions():
+    for i in range(8):
+        one_byte_instructions.add(0x40 + i)
+        one_byte_instructions.add(0x48 + i)
+        one_byte_instructions.add(0x50 + i)
+        one_byte_instructions.add(0x58 + i)
+        one_byte_instructions.add(0x90 + i)
+
+def myhex(num):
+    res = hex(num).upper()[2:]
+    if len(res) == 1:
+        res = '0' + res
+    return res
+
 def calculate(index, base):
     i = 0
     left = 0
@@ -15,12 +31,14 @@ def calculate(index, base):
 
 def printb(vectors):
     for i in range(0x100):
+        if i in one_byte_instructions:
+            print(r'\cellcolor{green} ', end='')
         for vector in vectors:
             if i >= vector[0] and i <= vector[1]:
-                print(r'\textcolor{red}'+ '{' + hex(i)[2:] + '}', end='')
+                print(r'\textcolor{red}'+ '{' +myhex(i) + '}', end='')
                 break
         else:
-            print(hex(i)[2:], end='')
+            print(myhex(i), end='')
 
         if (i+1) % 0x10 == 0:
             print(r'\\')
@@ -28,6 +46,7 @@ def printb(vectors):
             print(' & ', end='')
 
 if __name__ == '__main__':
+    fill_instructions()
     res = calculate(5, 5)
 
     printb(res)
