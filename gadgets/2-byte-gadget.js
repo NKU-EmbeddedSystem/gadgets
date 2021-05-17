@@ -1,16 +1,13 @@
 var array = new Uint8Array();
 
-function jsc(a, b, c)
+function jsc(a)
 {
-	array[0x58] = 0xc3;
-	array[0x59] = 0xc3;
-	array[0x5a] = 0xc3;
-
-	return a ^ b ^ c;
+    var gadget = 0x12f70e;
+    return a ^ gadget ^ 0x123456;
 }
 
 
 for(var i = 0; i < 100000; ++i)
 {
-	jsc(0x1, 0x2, 0x3);
+	jsc(0x1);
 }

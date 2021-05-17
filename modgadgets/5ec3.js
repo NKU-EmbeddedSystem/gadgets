@@ -1,4 +1,4 @@
-function jsc5ac3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax) {
+function jsc5ac3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax, rbx, rsi) {
     rdx &= 0x10;
     rcx &= 0x11;
     rdi &= 0x12;
@@ -9,10 +9,12 @@ function jsc5ac3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax) {
     r14 &= 0x17;
     r15 &= 0x18;
     rax &= 0x19;
-    let i0 = rdx + 0x11;
-    //leal rbx, rdx
-    let rbx = rdx - 0x3d;
-    return (i0 + rbx) + rdx + rcx + rdi + r8 + r9 + r11 + r12 + r14 + r15 + rax;
+    rbx &= 0x20;
+    rsi &= 0x21;
+    let i0 = rsi + 0x11;
+    //leal rbx, rsi
+    rbx = rsi - 0x3d;
+    return (i0 + rbx) + rdx + rcx + rdi + r8 + r9 + r11 + r12 + r14 + r15 + rax + rsi;
 }
 
 for (let i = 0; i < 0x10000; i++) {
