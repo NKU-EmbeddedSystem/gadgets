@@ -9,9 +9,9 @@ function jsc5ac3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax) {
     r14 &= 0x17;
     r15 &= 0x18;
     rax &= 0x19;
-    let i0 = rdx + 0x11;
-    //leal rbx, rdx
-    let rbx = rdx - 0x3d;
+    let i0 = rdi + 0x11;
+    //leal rbx, rdi
+    let rbx = rdi - 0x3d;
     return (i0 + rbx) + rdx + rcx + rdi + r8 + r9 + r11 + r12 + r14 + r15 + rax;
 }
 
