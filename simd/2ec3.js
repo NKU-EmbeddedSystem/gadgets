@@ -4,7 +4,9 @@ function jsc58c3(p_xmm0, p_xmm1, p_xmm2, p_xmm3)
     let v_xmm1 = p_xmm1 * 0.02;
     let v_xmm2 = p_xmm2 * 0.03;
     let v_xmm3 = p_xmm3 * 0.04;
-    let s = v_xmm0 + v_xmm3;
+
+    // avx cmp
+    let s = v_xmm0 > v_xmm3 ? v_xmm0 : v_xmm3;
     return v_xmm1 + v_xmm2 + s;
 }
 

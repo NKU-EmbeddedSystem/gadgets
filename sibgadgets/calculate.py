@@ -30,11 +30,17 @@ def calculate(index, base):
     return res
 
 def printb(vectors):
+    count = 0
     for i in range(0x100):
+        flag = 0
         if i in one_byte_instructions:
             print(r'\cellcolor{green} ', end='')
+            flag = 1
         for vector in vectors:
             if i >= vector[0] and i <= vector[1]:
+                if flag == 1:
+                    count += 1
+                    flag = 0
                 print(r'\textcolor{red}'+ '{' +myhex(i) + '}', end='')
                 break
         else:
@@ -45,8 +51,10 @@ def printb(vectors):
         else:
             print(' & ', end='')
 
+    print(count / len(one_byte_instructions))
+
 if __name__ == '__main__':
     fill_instructions()
     res = calculate(5, 5)
-
+    print(len(res) / 256)
     printb(res)
