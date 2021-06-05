@@ -11,9 +11,9 @@ function jsc58c3(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_
     let v_rax = p_rax & 0x19;
     let v_rbx = p_rbx & 0x20;
     let v_rsi = p_rsi & 0x21;
-    let i0  = v_rax + 0x11;
-    v_rbx = v_rax + v_rdi;
-    return (i0 + v_rbx) + v_rdx + v_rcx + v_rdi + v_r8 + v_r9 + v_r11 + v_r12 + v_r14 + v_r15 + v_rax + v_rsi;
+    v_rbx = v_rax - 0x3d;
+    //let i0  = v_rax + 0x11;
+    return v_rbx + v_rdx + v_rcx + v_rdi + v_r8 + v_r9 + v_r11 + v_r12 + v_r14 + v_r15 + v_rax + v_rsi;
 }
 
 for(let i = 0; i < 0x10000; i++)
