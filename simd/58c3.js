@@ -9,7 +9,7 @@ function jsc58c3(p_xmm0, p_xmm1, p_xmm2, p_xmm3, p_xmm4, p_xmm5, p_xmm6, p_xmm7)
     let v_xmm6 = p_xmm6 * 0.016;
     let v_xmm7 = p_xmm7 * 0.017;
     let s = v_xmm0 + v_xmm3;
-    return v_xmm0 + (v_xmm1 + s) + v_xmm2 + v_xmm4 + v_xmm5 + v_xmm6 + v_xmm7;
+    return (v_xmm0 + s) + v_xmm1 + v_xmm2 + v_xmm4 + v_xmm5 + v_xmm6 + v_xmm7;
 }
 
 for(let i = 0; i < 0x10000; i++)
