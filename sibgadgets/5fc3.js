@@ -11,7 +11,7 @@ function jsc5fc3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax, rbx, rsi){
 	rax &= 0x19;
 	rbx &= 0x20;
 	rsi &= 0x21;
-	let s = rdi + rbx * 2 + 0xc3;
+	let s = rdi + rbx * 2 - 0x3d;
 	return rdx + rcx + r8 + r9 + r11 + r12 + r14 + r15 + rax + rsi + s;
 }
 
