@@ -1,7 +1,6 @@
 .gdb_history
 *.txt
 /gen_gadget/*.js
-/sibgadgets/*.js
 *.json
 *.cfg
 /.idea/*
