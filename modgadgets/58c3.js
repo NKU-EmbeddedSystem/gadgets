@@ -14,7 +14,7 @@ function jsc58c3(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_
     //8d58c3 leal rbx,[rax-0x3d]
     p_rbx = p_rax - 0x3d;
     let i0  = p_rbx + 0x11;
-    return i0 + p_rbx + p_rdx + p_rcx + p_rdi + p_r8 + p_r9 + p_r11 + p_r12 + p_r14 + p_r15 + p_rax + p_rsi;
+    return (i0 + p_rbx) + p_rdx + p_rcx + p_rdi + p_r8 + p_r9 + p_r11 + p_r12 + p_r14 + p_r15 + p_rax + p_rsi;
 }
 
 for(let i = 0; i < 0x10000; i++)
