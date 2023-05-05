@@ -1,6 +1,5 @@
 const buffer = new ArrayBuffer(0x7000000);
-// scale 2
-const objb = new Uint16Array(buffer);
+const array16_t = new Uint16Array(buffer); // scale 2
 function jsc58c3(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_rax, p_rbx, p_rsi){
     p_rdx &= 0x10; // 83e210   andl rdx,0x10
     p_rcx &= 0x11; // 83e111   andl rcx,0x11
@@ -14,13 +13,12 @@ function jsc58c3(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_
     p_rax &= 0x19; // 83e019   andl rax,0x19
     p_rbx &= 0x20; // 83e320   andl rbx,0x20
     p_rsi &= 0x21; // 83e621   andl rsi,0x21
-    //8d4c58c3  leal rcx,[rax+rbx*2-0x3d]
-    objb[p_rbx] = 0xc3; // 66c70443c300   movw [rbx+rax*2],0xc3
-    // let s = p_rax + p_rbx * 2 - 0x3d;
-    return  p_rdx + p_rcx + p_rdi + p_r8 + p_r9 +p_r11 + p_r12 + p_r14 + p_r15 + p_rsi;
+    // rdx + rbx * 2
+    array16_t[p_rbx] = 0xc3; // 66c70443c300   movw [rax+rbx*2],0xc3
+    return  p_rcx + p_rdi + p_r8 + p_r9 +p_r11 + p_r12 + p_r14 + p_r15 + p_rax + p_rsi;
 }
 
-for(let i = 0; i < 0x100000; i++)
+for(let i = 0; i < 0x10000; i++)
 {
-	jsc58c3(0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xc10, 0xc11);
+    jsc58c3(0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xc10, 0xc11);
 }

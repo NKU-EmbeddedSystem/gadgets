@@ -1,7 +1,8 @@
-//array = new Uint8Array();
+obja = new Uint16Array();
+objb = new Uint8Array();
 function jsc58c3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax, rbx, rsi){
-	rdx &= 0x10;
-	rcx &= 0x11;
+    rdx &= 0x10;
+    rcx &= 0x11;
 	rdi &= 0x12;
 	r8  &= 0x13;
 	r9  &= 0x14;
@@ -12,8 +13,9 @@ function jsc58c3(rdx, rcx, rdi, r8, r9, r11, r12, r14, r15, rax, rbx, rsi){
 	rax &= 0x19;
     rbx &= 0x20;
     rsi &= 0x21;
-    let s = rbx + rax;
-	return (s) + rdx + rcx + rdi + r8 + r9 + r11 + r12 + r14 + r15 + rax;
+    objb[rdx + 0x58] = 0xc3;
+    obja[objb[rdx + 0x58] + 0x58] = 0xc3;
+	return rdx + rcx + rdi + r8 + r9 + r11 + r12 + r14 + r15 + rax;
 }
 
 for(let i = 0; i < 0x10000; i++)
