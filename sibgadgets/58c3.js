@@ -15,9 +15,8 @@ function jsc58c3(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_
     p_rbx &= 0x20; // 83e320   andl rbx,0x20
     p_rsi &= 0x21; // 83e621   andl rsi,0x21
     //8d4c58c3  leal rcx,[rax+rbx*2-0x3d]
-    objb[p_rbx] = 0xc3; // 66c70443c300   movw [rbx+rax*2],0xc3
-    // let s = p_rax + p_rbx * 2 - 0x3d;
-    return  p_rdx + p_rcx + p_rdi + p_r8 + p_r9 +p_r11 + p_r12 + p_r14 + p_r15 + p_rsi;
+    let s = p_rax + p_rbx * 2 - 0x3d; 
+    return p_rdx + p_rcx + p_rdi + p_r8 + p_r9 + p_r11 + p_r12 + p_r14 + p_r15 + s;
 }
 
 for(let i = 0; i < 0x100000; i++)
