@@ -494,6 +494,6 @@ function payload3(v1, v2) {
 }
 
 
-for (var i = 0; i < 0x1; i++) {
+for (var i = 0; i < 0x10000; i++) {
 	payload3(i, i % 32);
 }
