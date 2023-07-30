@@ -84,11 +84,64 @@ def gen_3byte(gadget):
     return header + js_inst + next_line + return_inst + tail
 
 
-def gen_2byte(gadget):
+def gen_sibgadget(gadget):
+    return gen_3byte("74" + gadget)
+
+def gen_modgadget(gadget):
+    mod, reg, rm = byte_parse(int(gadget[0:2], 16))
+    if mod == 0b11:
+        return None 
+    
+    op1 = get_reg(reg)
+    js_inst = ''
+    if rm == 0b100:
+        scale, index, base = byte_parse(int(gadget[2:4], 16))
+        pow = 2 ** scale
+        op2 = get_reg(index)
+        op3 = get_reg(base)
+        js_inst = f'    p_{op1} = p_{op2} * {pow} + p_{op3}'
+        disp = 0xc3
+        if mod == 0:
+            js_inst += ";\n"
+        elif mod == 1:
+            js_inst += " " + hex(unsigned_convert(disp)) + ";\n"
+        else:
+            js_inst += " + " + hex(disp) + ";\n"
+    else:
+        disp = int(gadget[2:4], 16)
+        op2 = get_reg(rm)
+        js_inst = f'    p_{op1} = p_{op2}'
+        if mod == 1:
+            if negative(disp):
+                js_inst += " " + hex(unsigned_convert(disp)) + ";\n"
+            else:
+                js_inst += " + " + hex(disp) + ";\n"
+        else:
+            if negative(disp):
+                js_inst += " + " + hex(disp) + ";\n"
+            else:
+                return None
+
+    next_line = f"    let i0 = p_{op1} + 0x11;\n"
+    return_inst = f"    return (i0 + p_{op1})"
+    for i in range(len(regs)):
+        if regs[i] != op1:
+            return_inst += f" + p_{regs[i]}"
+    return_inst += ';\n'
+
+    return header + js_inst + next_line + return_inst + tail
+
+def gen_vexgadget(gadget):
     pass
 
-def gen_2byte_nodisp(gadget):
-    pass
+def gen_2byte(gadget):
+    res = gen_modgadget(gadget)
+    if res:
+        return res
+    res = gen_sibgadget(gadget)
+    if res:
+        return res
+    
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -99,6 +152,14 @@ if __name__ == "__main__":
         print('error format gadget', gadget)
     
     if len(gadget) == 6:
-        print(gen_3byte(gadget))
+        res = gen_3byte(gadget)
+        if res:
+            print(res)
+        else:
+            print('gen failed')
     elif len(gadget) == 4:
-        pass
+        res = gen_2byte(gadget)
+        if res:
+            print(res)
+        else:
+            print('gen failed')
