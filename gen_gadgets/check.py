@@ -170,7 +170,17 @@ def gen_gadget(gadget):
             return None
 
 
+danger_ops = ['pop', 'j', 'call', 'ret', 'jmp', 'mov', 'add', 'sub',
+              'inc', 'dec', 'adc', 'sbc', 'int', 'xor', 'or', 'test', 'cmp']
+
+danger_1_codes = dict()
+danger_2_codes = dict()
+all_codes = dict()
+
 if __name__ == "__main__":
+    df = open('danger.txt', 'w')
+    af = open('all.txt', 'w')
+
     for i in range(0xffff):
         iter = (i << 8) + 0xc3
         gadget = gen_gadget(hex(iter)[2:])
@@ -179,9 +189,33 @@ if __name__ == "__main__":
         length = 1
         if i > 0xff:
             length = 2
-        decoder = Decoder(64, i.to_bytes(length, 'little'), ip=0x1234_5678)
+        decoder = Decoder(64, i.to_bytes(length, 'big'), ip=0x1234_5678)
         instr = decoder.decode()
         str_inst = f"{instr:f}"
         if str_inst.find("bad") != -1:
             continue
-        print(str_inst, hex(i), length)
+        af.write(str_inst + " " + hex(i) + '\n')
+        if i > 0xff:
+            all_codes[i >> 8] = str_inst
+        else:
+            all_codes[i] = str_inst
+        for op in danger_ops:
+            if str_inst.find(op) != -1:
+                if i > 0xff:
+                    danger_2_codes[i >> 8] = str_inst
+                else:
+                    danger_1_codes[i] = str_inst
+
+                df.write(str_inst + " " + hex(i) + '\n')
+                break
+    df.close()
+    af.close()
+    print('danger_1_codes')
+    for op in danger_1_codes:
+        print(hex(op), danger_1_codes[op])
+    print('danger_2_codes')
+    for op in danger_2_codes:
+        print(hex(op), danger_2_codes[op])
+    print('all_codes')
+    for op in all_codes:
+        print(hex(op), all_codes[op])
