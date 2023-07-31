@@ -1,6 +1,7 @@
 import sys
 
-regs = ['rdx', 'rcx', 'rdi', 'r8', 'r9', 'r11', 'r12', 'r14', 'r15', 'rax', 'rbx', 'rsi']
+regs = ['rdx', 'rcx', 'rdi', 'r8', 'r9', 'r11',
+        'r12', 'r14', 'r15', 'rax', 'rbx', 'rsi']
 code2reg = ['rax', 'rcx', 'rdx', 'rbx', None, 'rbp', 'rsi', 'rdi']
 header = '''function jsc(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_rax, p_rbx, p_rsi){
     p_rdx &= 0x10; // 83e210   andl rdx,0x10
@@ -25,22 +26,26 @@ for(let i = 0; i < 0x10000; i++)
 }
 '''
 
+
 def get_reg(code):
     if code >= len(code2reg):
-        return None 
+        return None
     return code2reg[code]
 
+
 def byte_parse(byte):
-    # return modrm or scale 
+    # return modrm or scale
     rm = byte & 7
     byte >>= 3
-    reg = byte & 7 
-    byte >>= 3 
+    reg = byte & 7
+    byte >>= 3
     mod = byte
     return (mod, reg, rm)
 
+
 def negative(num):
-    return (num & 128) != 0 
+    return (num & 128) != 0
+
 
 def unsigned_convert(num):
     if negative(num):
@@ -48,18 +53,25 @@ def unsigned_convert(num):
     else:
         return num
 
+
 def gen_3byte(gadget):
     mod, reg, rm = byte_parse(int(gadget[0:2], 16))
     if rm != 0b100:
-        return None 
+        return None
     if mod == 0b11 or mod == 0b00:
-        return None 
-    
+        return None
+
     op1 = get_reg(reg)
+    if not op1:
+        return None
     scale, index, base = byte_parse(int(gadget[2:4], 16))
     pow = 2 ** scale
     op2 = get_reg(index)
+    if not op2:
+        return None
     op3 = get_reg(base)
+    if not op3:
+        return None
     js_inst = f'    p_{op1} = p_{op2} * {pow} + p_{op3}'
 
     disp = int(gadget[4:6], 16)
@@ -87,18 +99,25 @@ def gen_3byte(gadget):
 def gen_sibgadget(gadget):
     return gen_3byte("74" + gadget)
 
+
 def gen_modgadget(gadget):
     mod, reg, rm = byte_parse(int(gadget[0:2], 16))
     if mod == 0b11:
-        return None 
-    
+        return None
+
     op1 = get_reg(reg)
+    if not op1:
+        return None
     js_inst = ''
     if rm == 0b100:
         scale, index, base = byte_parse(int(gadget[2:4], 16))
         pow = 2 ** scale
         op2 = get_reg(index)
+        if not op2:
+            return None
         op3 = get_reg(base)
+        if not op3:
+            return None
         js_inst = f'    p_{op1} = p_{op2} * {pow} + p_{op3}'
         disp = 0xc3
         if mod == 0:
@@ -110,6 +129,8 @@ def gen_modgadget(gadget):
     else:
         disp = int(gadget[2:4], 16)
         op2 = get_reg(rm)
+        if not op2:
+            return None
         js_inst = f'    p_{op1} = p_{op2}'
         if mod == 1:
             if negative(disp):
@@ -131,17 +152,19 @@ def gen_modgadget(gadget):
 
     return header + js_inst + next_line + return_inst + tail
 
+
 def gen_vexgadget(gadget):
     pass
 
+
 def gen_2byte(gadget):
-    res = gen_modgadget(gadget)
-    if res:
-        return res
     res = gen_sibgadget(gadget)
     if res:
         return res
-    
+    res = gen_modgadget(gadget)
+    if res:
+        return res
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -150,7 +173,7 @@ if __name__ == "__main__":
     gadget = sys.argv[1]
     if len(gadget) != 6 and len(gadget) != 4:
         print('error format gadget', gadget)
-    
+
     if len(gadget) == 6:
         res = gen_3byte(gadget)
         if res:

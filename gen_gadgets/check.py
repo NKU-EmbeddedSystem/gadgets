@@ -65,10 +65,16 @@ def gen_3byte(gadget):
         return None
 
     op1 = get_reg(reg)
+    if not op1:
+        return None
     scale, index, base = byte_parse(int(gadget[2:4], 16))
     pow = 2 ** scale
     op2 = get_reg(index)
+    if not op2:
+        return None
     op3 = get_reg(base)
+    if not op3:
+        return None
     js_inst = f'    p_{op1} = p_{op2} * {pow} + p_{op3}'
 
     disp = int(gadget[4:6], 16)
@@ -103,12 +109,18 @@ def gen_modgadget(gadget):
         return None
 
     op1 = get_reg(reg)
+    if not op1:
+        return None
     js_inst = ''
     if rm == 0b100:
         scale, index, base = byte_parse(int(gadget[2:4], 16))
         pow = 2 ** scale
         op2 = get_reg(index)
+        if not op2:
+            return None
         op3 = get_reg(base)
+        if not op3:
+            return None
         js_inst = f'    p_{op1} = p_{op2} * {pow} + p_{op3}'
         disp = 0xc3
         if mod == 0:
@@ -120,6 +132,8 @@ def gen_modgadget(gadget):
     else:
         disp = int(gadget[2:4], 16)
         op2 = get_reg(rm)
+        if not op2:
+            return None
         js_inst = f'    p_{op1} = p_{op2}'
         if mod == 1:
             if negative(disp):
