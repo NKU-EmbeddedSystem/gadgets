@@ -2,7 +2,7 @@ import sys
 
 regs = ['rdx', 'rcx', 'rdi', 'r8', 'r9', 'r11',
         'r12', 'r14', 'r15', 'rax', 'rbx', 'rsi']
-code2reg = ['rax', 'rcx', 'rdx', 'rbx', None, 'rbp', 'rsi', 'rdi']
+code2reg = ['rax', 'rcx', 'rdx', 'rbx', 'r12', None, 'rsi', 'rdi']
 header = '''function jsc(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_rax, p_rbx, p_rsi){
     p_rdx &= 0x10; // 83e210   andl rdx,0x10
     p_rcx &= 0x11; // 83e111   andl rcx,0x11
