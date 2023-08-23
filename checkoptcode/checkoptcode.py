@@ -71,13 +71,46 @@ def instr2gadget(modrm, line, rm):
 
 
 def check3(gadget):
-    if int(gadget[0:2], 16) in danger2 and int(gadget[4:6], 16) == 0xc3:
+    # if int(gadget[0:2], 16) in danger2 and int(gadget[4:6], 16) == 0xc3:
+    if int(gadget[0:2], 16) in danger2:
         return True
 
 
 def check2(gadget):
-    if int(gadget[0:2], 16) in danger1 and int(gadget[2:4], 16) == 0xc3:
+    # if int(gadget[0:2], 16) in danger1 and int(gadget[2:4], 16) == 0xc3:
+    if int(gadget[0:2], 16) in danger1:
         return True
+
+
+def process_line(line):
+    inst = line.split()[2]
+    inst_hex = int(inst, 16)
+    modrm_byte = 0
+    for instr in md.disasm(inst_hex.to_bytes(len(inst) // 2, 'big'),
+                           0x1234_5678):
+        if instr.modrm:
+            modrm_byte = instr.modrm
+            break
+
+    if modrm_byte == 0:
+        return
+
+    # check gadget from modrm byte
+    # if rm == 0b100: check danger2 else check danger1
+    # if rm == 0b100: sib also check danger1
+    rm = byte_parse_rm(modrm_byte)
+    inst = instr2gadget(ljust_hex(modrm_byte, 2), inst, rm)
+    # 直接检查code 吧，不要载disasm了
+    if rm == 4:
+        if len(inst) < 4:
+            return
+        if check2(inst) or check3(inst):
+            print(line, inst)
+        inst = inst[2:]
+    if len(inst) < 4:
+        return
+    if check2(inst):
+        print(line, inst)
 
 
 if __name__ == "__main__":
@@ -98,30 +131,4 @@ if __name__ == "__main__":
             going = False
             continue
         if going:
-            inst = line.split()[2]
-            inst_hex = int(inst, 16)
-            modrm_byte = 0
-            for instr in md.disasm(inst_hex.to_bytes(
-                    len(inst) // 2, 'big'), 0x1234_5678):
-                if instr.modrm:
-                    modrm_byte = instr.modrm
-                break
-            if modrm_byte == 0:
-                continue
-
-            # check gadget from modrm byte
-            # if rm == 0b100: check danger2 else check danger1
-            # if rm == 0b100: sib also check danger1
-            rm = byte_parse_rm(modrm_byte)
-            inst = instr2gadget(ljust_hex(modrm_byte, 2), inst, rm)
-            # 直接检查code 吧，不要载disasm了
-            if rm == 4:
-                if len(inst) < 4:
-                    continue
-                if check2(inst) or check3(inst):
-                    print(line, inst)
-                inst = inst[2:]
-            if len(inst) < 4:
-                continue
-            if check2(inst):
-                print(line, inst)
+            process_line(line)
