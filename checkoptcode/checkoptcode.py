@@ -1,8 +1,8 @@
-import sys
 from capstone import *
+import sys
 
-begin = "Instructions"
-end = ""  # empty line
+begin = "real instructions begin"
+end = "end"  # empty line
 
 
 def ljust_hex(hex_number, width):
@@ -83,8 +83,14 @@ def check2(gadget):
 
 
 def process_line(line):
+    components = line.split()
+    if len(components) < 4:
+        return
     inst = line.split()[2]
-    inst_hex = int(inst, 16)
+    try:
+        inst_hex = int(inst, 16)
+    except ValueError:
+        return
     modrm_byte = 0
     for instr in md.disasm(inst_hex.to_bytes(len(inst) // 2, 'big'),
                            0x1234_5678):
@@ -123,12 +129,17 @@ if __name__ == "__main__":
     lines = f.readlines()
     md = Cs(CS_ARCH_X86, CS_MODE_64)
     md.detail = True
-    for line in lines:
+    i = 0
+    while i < len(lines):
+        line = lines[i]
         if not going and begin in line:
+            i += 2
             going = True
             continue
-        if going and line.isspace():
+        if going and end in line:
             going = False
+            i += 2
             continue
         if going:
             process_line(line)
+        i += 1
