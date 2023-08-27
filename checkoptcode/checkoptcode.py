@@ -2,7 +2,7 @@ from capstone import *
 import sys
 
 begin = "real instructions begin"
-end = "end"  # empty line
+end = "real instructions end"  # empty line
 
 
 def ljust_hex(hex_number, width):
@@ -91,12 +91,21 @@ def process_line(line):
         inst_hex = int(inst, 16)
     except ValueError:
         return
+    if line.find("xmm") != -1:
+        return
+    if line.find("rsp") != -1:
+        return
     modrm_byte = 0
-    for instr in md.disasm(inst_hex.to_bytes(len(inst) // 2, 'big'),
-                           0x1234_5678):
-        if instr.modrm:
-            modrm_byte = instr.modrm
-            break
+    sib_byte = 0
+    try:
+        for instr in md.disasm(inst_hex.to_bytes(len(inst) // 2, 'big'),
+                               0x1234_5678):
+            if instr.modrm:
+                modrm_byte = instr.modrm
+                break
+    except OverflowError:
+        print(line)
+        return
 
     if modrm_byte == 0:
         return
@@ -133,12 +142,12 @@ if __name__ == "__main__":
     while i < len(lines):
         line = lines[i]
         if not going and begin in line:
-            i += 2
+            i += 1
             going = True
             continue
         if going and end in line:
             going = False
-            i += 2
+            i += 1
             continue
         if going:
             process_line(line)
