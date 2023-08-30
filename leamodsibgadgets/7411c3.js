@@ -11,9 +11,9 @@ function jsc7411c3(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, 
     p_rax &= 0x19; // 83e019   andl rax,0x19
     p_rbx &= 0x20; // dead code
     p_rsi &= 0x21; // 83e621   andl rsi,0x21 
-    //8d58c3 leal rbx,[rax-0x3d]
-    p_rsi = p_rdx + p_rcx - 0x3d;
-    let i0  = p_rsi + 0x11;
+    // 8d7411c3       leal rsi,[rcx+rdx*1-0x3d]
+    p_rsi = p_rdx * 1 + p_rcx - 0x3d;
+    let i0 = p_rsi + 0x11;
     return (i0 + p_rsi) + p_rdx + p_rcx + p_rdi + p_r8 + p_r9 + p_r11 + p_r12 + p_r14 + p_r15 + p_rax + p_rbx;
 }
 
@@ -21,3 +21,4 @@ for(let i = 0; i < 0x10000; i++)
 {
     jsc7411c3(0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xc10, 0xc11);
 }
+
