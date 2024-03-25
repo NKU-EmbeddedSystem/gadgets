@@ -17,7 +17,7 @@ function jsc58c3(p_rdx, p_rcx, p_rdi, p_r8, p_r9, p_r11, p_r12, p_r14, p_r15, p_
     return (i0 + p_rbx) + p_rdx + p_rcx + p_rdi + p_r8 + p_r9 + p_r11 + p_r12 + p_r14 + p_r15 + p_rax + p_rsi;
 }
 
-for(let i = 0; i < 0x10000; i++)
+for(let i = 0; i < 10000; i++)
 {
     jsc58c3(0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xc10, 0xc11);
 }
